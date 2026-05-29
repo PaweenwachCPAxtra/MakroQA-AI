@@ -212,6 +212,8 @@ h1 span{color:var(--accent);}
 </style>
 </head>
 <body>
+
+
 <div class="platform">
 <div class="hero">
   <div class="eyebrow">Makro QA AI-Powered</div>
@@ -227,29 +229,187 @@ h1 span{color:var(--accent);}
 </div>
 <div class="content">
 
-<!-- ① Requirements -->
+<!-- ① Test Cases -->
 <div class="panel active" id="p0">
-  <div class="card">
-    <div class="clabel">MakroPRO — User Story</div>
+
+<style>
+/* ── Prompt Workflow Styles ── */
+.workflow-steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.ws{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;}
+.ws-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ws.done .ws-num{background:var(--accent);color:#0a0e1a;}
+.ws.active .ws-num{background:var(--accent2);color:#fff;}
+.ws.idle .ws-num{background:var(--surface2);color:var(--muted);}
+.ws.done .ws-label{color:var(--accent);}
+.ws.active .ws-label{color:var(--text);}
+.ws.idle .ws-label{color:var(--muted);}
+.ws-sep{color:var(--muted);font-size:12px;}
+
+/* Screen toggles */
+.tc-screen{display:none;}
+.tc-screen.active{display:block;animation:fadeUp .35s ease;}
+
+/* Prompt screen */
+.prompt-area-wrap{position:relative;margin-bottom:10px;}
+.prompt-area{width:100%;min-height:110px;background:var(--surface2);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.65;transition:border-color .2s;}
+.prompt-area:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(124,106,255,.12);}
+.prompt-area::placeholder{color:#334155;}
+.prompt-char{position:absolute;bottom:10px;right:12px;font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);}
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.tip-card{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;cursor:pointer;transition:all .18s;border-left:3px solid transparent;}
+.tip-card:hover{border-left-color:var(--accent2);background:rgba(124,106,255,.06);}
+.tip-card-label{font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:4px;}
+.tip-card-text{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.tip-card:hover .tip-card-text{color:var(--text);}
+.send-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:10px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.send-btn:hover{opacity:.9;transform:translateY(-1px);}
+.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* VS Code screen */
+.vscode-wrap{background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid rgba(255,255,255,.06);}
+.vscode-titlebar{background:#323233;padding:8px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06);}
+.vscode-dots{display:flex;gap:5px;}
+.vscode-dot{width:10px;height:10px;border-radius:50%;}
+.vscode-title{font-family:'Fira Code',monospace;font-size:11px;color:#cccccc;margin:0 auto;}
+.vscode-badge{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 8px;border-radius:4px;background:rgba(0,212,170,.15);color:#00d4aa;}
+.vscode-tabs{background:#252526;display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.06);}
+.vscode-tab{padding:7px 16px;font-family:'Fira Code',monospace;font-size:11px;color:#969696;border-right:1px solid rgba(255,255,255,.05);cursor:default;}
+.vscode-tab.active{background:#1e1e1e;color:#cccccc;border-top:1px solid #007acc;}
+.vscode-body{display:flex;min-height:260px;}
+.vscode-sidebar{background:#252526;width:36px;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:14px;border-right:1px solid rgba(255,255,255,.06);}
+.vscode-sidebar-icon{font-size:14px;opacity:.5;cursor:pointer;}
+.vscode-sidebar-icon:hover{opacity:1;}
+.vscode-editor{flex:1;display:flex;}
+.vscode-gutter{background:#1e1e1e;padding:10px 0;min-width:36px;text-align:right;font-family:'Fira Code',monospace;font-size:11.5px;color:#404040;line-height:1.85;user-select:none;border-right:1px solid rgba(255,255,255,.04);}
+.vscode-gutter div{padding:0 8px;}
+.vscode-code{flex:1;padding:10px 16px;font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.85;color:#d4d4d4;overflow-x:auto;white-space:pre;}
+.vscode-terminal{background:#0f0f0f;border-top:1px solid rgba(255,255,255,.08);padding:10px 14px;font-family:'Fira Code',monospace;font-size:11px;line-height:1.75;max-height:100px;overflow-y:auto;}
+.vscode-terminal-title{color:#cccccc;font-size:10px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.t-green{color:#4ec9b0;}.t-yellow{color:#dcdcaa;}.t-blue{color:#569cd6;}.t-orange{color:#ce9178;}.t-purple{color:#c586c0;}.t-gray{color:#6a9955;font-style:italic;}.t-white{color:#d4d4d4;}.t-dim{color:#555;}.t-pass{color:#4ec9b0;}.t-fail{color:#f44747;}.t-warn{color:#ffcc02;}
+
+/* Results screen */
+.results-header{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.results-stats{display:flex;gap:10px;}
+.rstat{font-size:12px;font-weight:600;padding:4px 10px;border-radius:5px;}
+.rstat.pass{background:rgba(0,212,170,.12);color:var(--accent);}
+.rstat.skip{background:rgba(245,158,11,.12);color:var(--amber);}
+.rstat.fail{background:rgba(255,107,107,.12);color:var(--accent3);}
+.reset-btn{padding:7px 14px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.reset-btn:hover{border-color:var(--accent2);color:var(--text);}
+</style>
+
+<!-- Workflow progress indicator -->
+<div class="workflow-steps" id="wf-steps">
+  <div class="ws active" id="wf1"><div class="ws-num">1</div><span class="ws-label">Write Prompt</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="wf2"><div class="ws-num">2</div><span class="ws-label">AI Generates</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="wf3"><div class="ws-num">3</div><span class="ws-label">Review Test Cases</span></div>
+</div>
+
+<!-- ── SCREEN 1: Prompt Input ── -->
+<div class="tc-screen active" id="screen-prompt">
+  <div class="card" style="margin-bottom:10px;">
+    <div class="clabel">MakroPRO — User Story (Reference)</div>
     <span class="stag ui-tag">🖥 UI Layer</span><span class="stag api-tag">⚡ API Layer</span>
-    <div class="stext">As a <strong style="color:var(--accent)">MakroPRO customer</strong>, I want to add a new product to the basket and confirm it is immediately available through the product API, so that customers can browse and purchase it without delay.</div>
-    <div class="acs">Acceptance Criteria</div>
-    <ul class="acl">
-      <li class="aci"><div class="acd" style="background:var(--accent)"></div>Customer logs in with valid credentials — redirected to homepage</li>
-      <li class="aci"><div class="acd" style="background:var(--accent)"></div>Browse/search and select a product to view the detail page</li>
-      <li class="aci"><div class="acd" style="background:var(--accent)"></div>Clicking "Add to Basket" updates icon count and shows confirmation within 2s</li>
-      <li class="aci"><div class="acd" style="background:var(--accent2)"></div>POST /api/v2/basket/items returns HTTP 201 with product_id and quantity</li>
-      <li class="aci"><div class="acd" style="background:var(--accent2)"></div>GET /api/v2/basket returns product with status: "available" within 3s</li>
-      <li class="aci"><div class="acd" style="background:var(--amber)"></div>Out-of-stock → button disabled; API returns 422 with reason "out_of_stock"</li>
-      <li class="aci"><div class="acd" style="background:var(--amber)"></div>Adding same product twice → quantity increments, no duplicate item</li>
-      <li class="aci"><div class="acd" style="background:var(--accent3)"></div>Unauthenticated add → redirect to login; API returns 401</li>
-    </ul>
+    <div class="stext" style="margin-top:6px;">As a <strong style="color:var(--accent)">MakroPRO customer</strong>, I want to add a new product to the basket and confirm it is immediately available through the product API, so that customers can browse and purchase it without delay.</div>
   </div>
-  <button class="abtn" id="abtn" onclick="analyzeReq()"><div class="spin" id="sp1"></div><span id="albl">✦ Analyze with AI → Generate Test Cases</span></button>
 
-  <!-- TC Table -->
+  <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:6px;">✍️ Write your AI prompt</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Describe what test cases you want AI to generate. Be specific — include layers, scenarios, and edge cases.</div>
+
+  <!-- Prompt tips -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;">💡 Prompt Tips — click to use</div>
+  <div class="tips-grid">
+    <div class="tip-card" onclick="usePromptTip(0)">
+      <div class="tip-card-label">✅ Be Specific</div>
+      <div class="tip-card-text">"Generate UI and API test cases covering happy path, edge cases, and security for the add-to-basket feature"</div>
+    </div>
+    <div class="tip-card" onclick="usePromptTip(1)">
+      <div class="tip-card-label">🎯 Include Context</div>
+      <div class="tip-card-text">"Include prerequisites, test steps, and expected results. Reference endpoints like POST /api/v2/basket/items"</div>
+    </div>
+    <div class="tip-card" onclick="usePromptTip(2)">
+      <div class="tip-card-label">⚡ Specify Layers</div>
+      <div class="tip-card-text">"Separate UI tests (Playwright) from API tests (Robot Framework). Tag each with layer type and priority"</div>
+    </div>
+    <div class="tip-card" onclick="usePromptTip(3)">
+      <div class="tip-card-label">🔒 Add Edge Cases</div>
+      <div class="tip-card-text">"Include negative tests: out-of-stock, duplicate items, unauthenticated access, and invalid quantity values"</div>
+    </div>
+  </div>
+
+  <!-- Prompt input -->
+  <div class="prompt-area-wrap">
+    <textarea class="prompt-area" id="prompt-input" placeholder="e.g. Generate comprehensive test cases for the MakroPRO add-to-basket feature. Cover UI flows (login, product page, basket) and API endpoints (POST /api/v2/basket/items, GET /api/v2/basket). Include happy path, edge cases (out-of-stock, duplicates), and security tests (unauthorized access). Format with prerequisites, steps, and expected results..." oninput="updateCharCount(this)"></textarea>
+    <span class="prompt-char" id="char-count">0 / 500</span>
+  </div>
+
+  <button class="send-btn" id="send-prompt-btn" onclick="submitPrompt()">
+    <div class="spin" id="prompt-spin" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;"></div>
+    <span id="send-label">🤖 Send to AI → Generate Test Cases</span>
+  </button>
+  <p class="fn-note" style="margin-top:10px;">✦ The more context and specifics you give, the better the test coverage AI generates.</p>
+</div>
+
+<!-- ── SCREEN 2: VS Code Execution ── -->
+<div class="tc-screen" id="screen-vscode">
+  <div class="vscode-wrap">
+    <!-- Title bar -->
+    <div class="vscode-titlebar">
+      <div class="vscode-dots">
+        <div class="vscode-dot" style="background:#ff5f57;"></div>
+        <div class="vscode-dot" style="background:#ffbd2e;"></div>
+        <div class="vscode-dot" style="background:#27c93f;"></div>
+      </div>
+      <div class="vscode-title">generate-test-cases.py — VS Code</div>
+      <div class="vscode-badge" id="vscode-status">⏳ Running...</div>
+    </div>
+    <!-- File tabs -->
+    <div class="vscode-tabs">
+      <div class="vscode-tab active">generate-test-cases.py</div>
+      <div class="vscode-tab">prompt.txt</div>
+      <div class="vscode-tab">output/test_cases.json</div>
+    </div>
+    <!-- Editor body -->
+    <div class="vscode-body">
+      <div class="vscode-sidebar">
+        <div class="vscode-sidebar-icon">📁</div>
+        <div class="vscode-sidebar-icon">🔍</div>
+        <div class="vscode-sidebar-icon">🔀</div>
+        <div class="vscode-sidebar-icon">🐛</div>
+      </div>
+      <div class="vscode-editor">
+        <div class="vscode-gutter" id="vscode-gutter"></div>
+        <div class="vscode-code" id="vscode-code"><span class="t-dim">// Initialising AI engine...</span></div>
+      </div>
+    </div>
+    <!-- Terminal -->
+    <div class="vscode-terminal">
+      <div class="vscode-terminal-title">⚡ TERMINAL &nbsp;<span style="color:#555;">bash</span></div>
+      <div id="vscode-terminal-log"><span class="t-dim">$</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCREEN 3: Generated Test Cases ── -->
+<div class="tc-screen" id="screen-results">
+  <div class="results-header">
+    <div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--text);">✅ AI Generated Test Cases</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'Fira Code',monospace;">8 test cases · UI + API · MakroPRO basket feature</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div class="results-stats">
+        <span class="rstat pass">5 Happy Path</span>
+        <span class="rstat skip">2 Edge Case</span>
+        <span class="rstat fail">1 Security</span>
+      </div>
+      <button class="reset-btn" onclick="resetToPrompt()">↺ New Prompt</button>
+    </div>
+  </div>
+
   <div id="tcg" style="display:none;">
-
     <style>
       .tc-table-wrap{display:flex;flex-direction:column;gap:10px;}
       .tc-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;opacity:0;transform:translateY(8px);transition:opacity .35s ease,transform .35s ease;}
@@ -263,350 +423,117 @@ h1 span{color:var(--accent);}
       .tc-item.open .tc-chevron{transform:rotate(90deg);}
       .tc-body{display:none;border-top:1px solid var(--border);}
       .tc-item.open .tc-body{display:block;}
-
-      /* Table */
       .tc-table{width:100%;border-collapse:collapse;font-size:12.5px;}
       .tc-table th{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);}
       .tc-table th:first-child{width:160px;}
       .tc-table td{padding:10px 14px;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);line-height:1.6;font-size:12.5px;}
       .tc-table tr:last-child td{border-bottom:none;}
       .tc-table tr:hover td{background:rgba(255,255,255,.015);}
-      .tc-section-label{font-family:'Fira Code',monospace;font-size:10px;font-weight:600;padding:8px 14px 4px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);}
       .step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(0,212,170,.15);color:var(--accent);font-size:9.5px;font-weight:700;flex-shrink:0;margin-right:7px;}
-      .prereq-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent2);margin-right:8px;vertical-align:middle;flex-shrink:0;}
+      .prereq-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent2);margin-right:8px;vertical-align:middle;}
       .exp-check{color:var(--accent);margin-right:6px;}
       .field-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
       .priority-high{color:var(--accent3);font-weight:600;}
       .priority-med{color:var(--amber);font-weight:600;}
-      .priority-low{color:var(--accent);font-weight:600;}
     </style>
 
     <div class="tc-table-wrap" id="tc-table-wrap">
-
-      <!-- TC-001 -->
-      <div class="tc-item" id="c1">
-        <div class="tc-item-head" onclick="toggleTC('c1')">
-          <span class="tc-num">TC-001</span>
-          <span class="tc-title-text">Login → Homepage Redirect</span>
-          <div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that a registered customer can log in successfully and is redirected to the MakroPRO homepage with the basket icon visible.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>🖥 UI</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Registered customer account exists: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">customer@test.com / Password123</code></div>
-                <div><span class="prereq-dot"></span>MakroPRO login page is accessible at <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">makropro.th/login</code></div>
-                <div><span class="prereq-dot"></span>Browser is open with no active session</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">https://www.makropro.th/login</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Enter email: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">customer@test.com</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Enter password: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">Password123</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Click the <strong>Login</strong> button</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">5</span>Observe the page URL and navigation elements</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>Page redirects to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">https://www.makropro.th/home</code></div>
-                <div><span class="exp-check">✅</span>HTTP response status is <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">200 OK</code></div>
-                <div><span class="exp-check">✅</span>Basket icon is visible in the navigation bar</div>
-                <div><span class="exp-check">✅</span>Customer name or greeting is displayed</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-002 -->
-      <div class="tc-item" id="c2">
-        <div class="tc-item-head" onclick="toggleTC('c2')">
-          <span class="tc-num">TC-002</span>
-          <span class="tc-title-text">Add Product to Basket — Success</span>
-          <div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that a logged-in customer can add an in-stock product to the basket and receives immediate visual confirmation.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>🖥 UI</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Customer is logged in (TC-001 passed)</div>
-                <div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">Thai Jasmine Rice 5kg (MKP-RICE-001)</code> is in-stock</div>
-                <div><span class="prereq-dot"></span>Customer basket is empty</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to product page: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">makropro.th/products/thai-jasmine-rice</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Verify the product is shown as in-stock</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Click the <strong>"Add to Basket"</strong> button</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Observe the basket icon count in the navigation</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">5</span>Observe the confirmation toast message and its timing</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>Basket icon count increments to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">1</code></div>
-                <div><span class="exp-check">✅</span>Confirmation toast <strong>"Product added to basket!"</strong> appears within <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">2 seconds</code></div>
-                <div><span class="exp-check">✅</span>Product remains on the same page after adding</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-003 -->
-      <div class="tc-item" id="c3">
-        <div class="tc-item-head" onclick="toggleTC('c3')">
-          <span class="tc-num">TC-003</span>
-          <span class="tc-title-text">POST /api/v2/basket/items → 201 Created</span>
-          <div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify the basket API accepts a valid add-to-basket request and returns the correct 201 response with all required fields.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Valid Bearer token available for authenticated customer</div>
-                <div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-RICE-001</code> exists and is in-stock in the system</div>
-                <div><span class="prereq-dot"></span>API base URL: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">https://api.makropro.th</code></div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">POST /api/v2/basket/items</code> with header <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">Authorization: Bearer &lt;token&gt;</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Set request body: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-RICE-001", "quantity": 1}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Capture the HTTP response status code</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Parse and inspect the response body JSON</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>HTTP status = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">201 Created</code></div>
-                <div><span class="exp-check">✅</span>Response body contains <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">product_id: "MKP-RICE-001"</code></div>
-                <div><span class="exp-check">✅</span>Response body contains <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">quantity: 1</code></div>
-                <div><span class="exp-check">✅</span>Response body contains <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">status: "available"</code></div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-004 -->
-      <div class="tc-item" id="c4">
-        <div class="tc-item-head" onclick="toggleTC('c4')">
-          <span class="tc-num">TC-004</span>
-          <span class="tc-title-text">GET Basket — Product Available within SLA</span>
-          <div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that after adding a product, the GET basket API returns the item with status "available" within the 3-second SLA.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>TC-003 has been executed — product added to basket</div>
-                <div><span class="prereq-dot"></span>Valid Bearer token is available</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">GET /api/v2/basket</code> with header <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">Authorization: Bearer &lt;token&gt;</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Record the response time from request to response</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Inspect <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">items[0].status</code> in the response body</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>HTTP status = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">200 OK</code></div>
-                <div><span class="exp-check">✅</span><code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">items[0].status</code> = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">"available"</code></div>
-                <div><span class="exp-check">✅</span>Response time ≤ <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">3000ms</code> (SLA)</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-005 -->
-      <div class="tc-item" id="c5">
-        <div class="tc-item-head" onclick="toggleTC('c5')">
-          <span class="tc-num">TC-005</span>
-          <span class="tc-title-text">Out-of-Stock — Button Disabled + API 422</span>
-          <div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that out-of-stock products are correctly blocked at both UI level (disabled button) and API level (422 with reason field).</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>🖥 UI + ⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-OOS-001</code> exists with stock quantity = 0</div>
-                <div><span class="prereq-dot"></span>Customer is logged in with valid Bearer token</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">makropro.th/products/out-of-stock-item</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Inspect the state of the <strong>"Add to Basket"</strong> button</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Send direct API call: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">POST /api/v2/basket/items</code> with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-OOS-001", "quantity": 1}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Inspect the API response status and body</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>UI: <strong>"Add to Basket"</strong> button is disabled and non-clickable</div>
-                <div><span class="exp-check">✅</span>API: HTTP status = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">422 Unprocessable Entity</code></div>
-                <div><span class="exp-check">✅</span>API response body contains <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">reason: "out_of_stock"</code></div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-006 -->
-      <div class="tc-item" id="c6">
-        <div class="tc-item-head" onclick="toggleTC('c6')">
-          <span class="tc-num">TC-006</span>
-          <span class="tc-title-text">Duplicate Add — Quantity Increments, No Duplicate Item</span>
-          <div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that adding the same product twice merges into a single basket item with an incremented quantity rather than creating duplicate entries.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Valid Bearer token available</div>
-                <div><span class="prereq-dot"></span>Customer basket is empty before test begins</div>
-                <div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-RICE-001</code> is in-stock with sufficient quantity</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">POST /api/v2/basket/items</code> with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-RICE-001", "quantity": 1}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Send the same request again with the same payload</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">GET /api/v2/basket</code> and inspect the <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">items</code> array</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span><code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">items</code> array contains exactly <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">1</code> entry for MKP-RICE-001</div>
-                <div><span class="exp-check">✅</span><code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">items[0].quantity</code> = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">2</code></div>
-                <div><span class="exp-check">✅</span>No duplicate basket item rows created</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-007 -->
-      <div class="tc-item" id="c7">
-        <div class="tc-item-head" onclick="toggleTC('c7')">
-          <span class="tc-num">TC-007</span>
-          <span class="tc-title-text">Unauthenticated Add to Basket → 401 Unauthorized</span>
-          <div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bf">Security</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that the basket API rejects requests without an Authorization token and returns a proper 401 response without exposing internal errors.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>No Authorization header is included in the request</div>
-                <div><span class="prereq-dot"></span>API endpoint is reachable</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">POST /api/v2/basket/items</code> with <strong>no Authorization header</strong></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Set request body: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-RICE-001", "quantity": 1}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Capture and inspect the HTTP response status and body</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>HTTP status = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">401 Unauthorized</code></div>
-                <div><span class="exp-check">✅</span>Response body contains <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">error: "unauthorized"</code></div>
-                <div><span class="exp-check">✅</span>No internal stack trace or server error is exposed in the response</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- TC-008 -->
-      <div class="tc-item" id="c8">
-        <div class="tc-item-head" onclick="toggleTC('c8')">
-          <span class="tc-num">TC-008</span>
-          <span class="tc-title-text">Zero / Negative Quantity Guard</span>
-          <div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div>
-          <span class="tc-chevron">▶</span>
-        </div>
-        <div class="tc-body">
-          <table class="tc-table">
-            <tr><th>Field</th><th>Details</th></tr>
-            <tr><td><div class="field-label">Objective</div></td><td>Verify that the API rejects basket requests with invalid quantity values (0 or negative) and returns a proper validation error.</td></tr>
-            <tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr>
-            <tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr>
-            <tr><td><div class="field-label">Prerequisites</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="prereq-dot"></span>Valid Bearer token available</div>
-                <div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-RICE-001</code> exists and is in-stock</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Test Steps</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Send <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">POST /api/v2/basket/items</code> with body: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-RICE-001", "quantity": 0}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Inspect response status and body for quantity = 0</div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Repeat with body: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id": "MKP-RICE-001", "quantity": -1}</code></div>
-                <div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Inspect response status and body for quantity = -1</div>
-              </div>
-            </td></tr>
-            <tr><td><div class="field-label">Expected Results</div></td><td>
-              <div style="display:flex;flex-direction:column;gap:5px;">
-                <div><span class="exp-check">✅</span>Both requests return HTTP <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">422 Unprocessable Entity</code></div>
-                <div><span class="exp-check">✅</span>Response body contains a validation error message referencing the <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">quantity</code> field</div>
-                <div><span class="exp-check">✅</span>No item is added to the basket</div>
-              </div>
-            </td></tr>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- end tc-table-wrap -->
-  </div><!-- end tcg -->
-  <p class="fn-note" id="tc-footnote" style="margin-top:11px;display:none;">✦ AI maps both <strong>UI acceptance criteria and API contracts</strong> to generate layered coverage.</p>
+      <div class="tc-item" id="c1"><div class="tc-item-head" onclick="toggleTC('c1')"><span class="tc-num">TC-001</span><span class="tc-title-text">Login → Homepage Redirect</span><div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify that a registered customer can log in successfully and is redirected to the homepage with the basket icon visible.</td></tr><tr><td><div class="field-label">Layer</div></td><td>🖥 UI</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>Registered account: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">customer@test.com / Password123</code></div><div><span class="prereq-dot"></span>Login page accessible at <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">makropro.th/login</code></div><div><span class="prereq-dot"></span>No active session in browser</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">https://www.makropro.th/login</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Enter email: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">customer@test.com</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Enter password and click <strong>Login</strong></div><div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Observe page URL and navigation elements</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Redirected to <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">/home</code></div><div><span class="exp-check">✅</span>HTTP 200 OK</div><div><span class="exp-check">✅</span>Basket icon visible in navigation</div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c2"><div class="tc-item-head" onclick="toggleTC('c2')"><span class="tc-num">TC-002</span><span class="tc-title-text">Add Product to Basket — Success</span><div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify a logged-in customer can add an in-stock product and receives immediate visual confirmation.</td></tr><tr><td><div class="field-label">Layer</div></td><td>🖥 UI</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>TC-001 passed — customer logged in</div><div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-RICE-001</code> in-stock</div><div><span class="prereq-dot"></span>Basket is empty</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to Thai Jasmine Rice product page</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Click <strong>"Add to Basket"</strong></div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Observe basket count and toast notification</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Basket count = <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">1</code></div><div><span class="exp-check">✅</span>Toast "Product added!" visible within 2s</div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c3"><div class="tc-item-head" onclick="toggleTC('c3')"><span class="tc-num">TC-003</span><span class="tc-title-text">POST /api/v2/basket/items → 201 Created</span><div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify the basket API accepts a valid request and returns 201 with correct payload.</td></tr><tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>Valid Bearer token</div><div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-RICE-001</code> in-stock</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>POST <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">/api/v2/basket/items</code> with auth header</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Body: <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">{"product_id":"MKP-RICE-001","quantity":1}</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Assert response status and body fields</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Status <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">201 Created</code></div><div><span class="exp-check">✅</span><code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">body.status === "available"</code></div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c4"><div class="tc-item-head" onclick="toggleTC('c4')"><span class="tc-num">TC-004</span><span class="tc-title-text">GET Basket — Product Available within SLA</span><div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bp">Happy Path</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify GET basket returns item with status "available" within the 3-second SLA.</td></tr><tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>TC-003 executed — item added</div><div><span class="prereq-dot"></span>Valid Bearer token</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>GET <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">/api/v2/basket</code> with auth header</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Record response time</div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>Assert <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">items[0].status</code></div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Status 200, <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">items[0].status === "available"</code></div><div><span class="exp-check">✅</span>Response time ≤ 3000ms (SLA)</div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c5"><div class="tc-item-head" onclick="toggleTC('c5')"><span class="tc-num">TC-005</span><span class="tc-title-text">Out-of-Stock — Button Disabled + API 422</span><div class="tc-badges"><span class="bdg bui">UI</span><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify out-of-stock products are blocked at both UI (disabled button) and API level (422 with reason).</td></tr><tr><td><div class="field-label">Layer</div></td><td>🖥 UI + ⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>Product <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-OOS-001</code> with stock = 0</div><div><span class="prereq-dot"></span>Valid Bearer token</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>Navigate to out-of-stock product page</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Inspect "Add to Basket" button state</div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>POST API with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">MKP-OOS-001</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">4</span>Assert API response status and reason</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>UI button is disabled</div><div><span class="exp-check">✅</span>API returns <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">422</code> with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">reason: "out_of_stock"</code></div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c6"><div class="tc-item-head" onclick="toggleTC('c6')"><span class="tc-num">TC-006</span><span class="tc-title-text">Duplicate Add — Quantity Increments</span><div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify adding the same product twice merges into one basket item with incremented quantity.</td></tr><tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="prereq-dot"></span>Valid Bearer token, empty basket</div></div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>POST same product twice</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>GET basket and check items array</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>items.length === 1 (no duplicate)</div><div><span class="exp-check">✅</span>items[0].quantity === 2</div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c7"><div class="tc-item-head" onclick="toggleTC('c7')"><span class="tc-num">TC-007</span><span class="tc-title-text">Unauthenticated Add → 401 Unauthorized</span><div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg bf">Security</span><span class="bdg" style="background:rgba(0,212,170,.1);color:var(--accent)">P1</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify the API rejects requests without an Authorization token and returns a proper 401.</td></tr><tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-high">High</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div><span class="prereq-dot"></span>No Authorization header in request</div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>POST <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">/api/v2/basket/items</code> with no auth header</div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>Assert response status and error field</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Status <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">401 Unauthorized</code></div><div><span class="exp-check">✅</span>No internal stack trace exposed</div></div></td></tr></table></div></div>
+      <div class="tc-item" id="c8"><div class="tc-item-head" onclick="toggleTC('c8')"><span class="tc-num">TC-008</span><span class="tc-title-text">Zero / Negative Quantity Guard</span><div class="tc-badges"><span class="bdg bapi">API</span><span class="bdg be">Edge Case</span><span class="bdg" style="background:rgba(245,158,11,.1);color:var(--amber)">P2</span></div><span class="tc-chevron">▶</span></div><div class="tc-body"><table class="tc-table"><tr><th>Field</th><th>Details</th></tr><tr><td><div class="field-label">Objective</div></td><td>Verify API rejects invalid quantity values (0 or negative) with a proper validation error.</td></tr><tr><td><div class="field-label">Layer</div></td><td>⚡ API</td></tr><tr><td><div class="field-label">Priority</div></td><td><span class="priority-med">Medium</span></td></tr><tr><td><div class="field-label">Prerequisites</div></td><td><div><span class="prereq-dot"></span>Valid Bearer token</div></td></tr><tr><td><div class="field-label">Test Steps</div></td><td><div style="display:flex;flex-direction:column;gap:6px;"><div style="display:flex;align-items:flex-start;"><span class="step-num">1</span>POST with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">quantity: 0</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">2</span>POST with <code style="font-family:'Fira Code',monospace;font-size:11px;color:#67e8f9">quantity: -1</code></div><div style="display:flex;align-items:flex-start;"><span class="step-num">3</span>GET basket — assert empty</div></div></td></tr><tr><td><div class="field-label">Expected Results</div></td><td><div style="display:flex;flex-direction:column;gap:5px;"><div><span class="exp-check">✅</span>Both return <code style="font-family:'Fira Code',monospace;font-size:11px;color:#86efac">422</code> with quantity validation error</div><div><span class="exp-check">✅</span>Basket remains empty</div></div></td></tr></table></div></div>
+    </div>
+  </div>
 </div>
 
-<!-- ② Scripts -->
+<p class="fn-note" id="tc-footnote" style="margin-top:11px;display:none;">✦ AI maps both <strong>UI acceptance criteria and API contracts</strong> to generate layered coverage.</p>
+</div>
+<!-- ② Playwright/Robot -->
 <div class="panel" id="p1">
+
+<style>
+.pw-wf-steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.pw-screen{display:none;}
+.pw-screen.active{display:block;animation:fadeUp .35s ease;}
+</style>
+
+<!-- Workflow steps -->
+<div class="pw-wf-steps" id="pw-wf-steps">
+  <div class="ws active" id="pw-wf1"><div class="ws-num">1</div><span class="ws-label">Write Prompt</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="pw-wf2"><div class="ws-num">2</div><span class="ws-label">AI Generates</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="pw-wf3"><div class="ws-num">3</div><span class="ws-label">Review Scripts</span></div>
+</div>
+
+<!-- SCREEN 1: Prompt -->
+<div class="pw-screen active" id="pw-screen-prompt">
+  <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:6px;">✍️ Describe the scripts you want to generate</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Specify the framework, test cases, and any special requirements for your automation scripts.</div>
+
+  <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;">💡 Prompt Tips — click to use</div>
+  <div class="tips-grid">
+    <div class="tip-card" onclick="usePwTip(0)"><div class="tip-card-label">🎭 Playwright</div><div class="tip-card-text">"Convert TC-001 to TC-008 into Playwright TypeScript using Page Object Model with data-testid selectors"</div></div>
+    <div class="tip-card" onclick="usePwTip(1)"><div class="tip-card-label">🤖 Robot Framework</div><div class="tip-card-text">"Generate Robot Framework keyword-driven scripts using Browser library for UI and RequestsLibrary for API tests"</div></div>
+    <div class="tip-card" onclick="usePwTip(2)"><div class="tip-card-label">⚡ Both Frameworks</div><div class="tip-card-text">"Generate both Playwright and Robot Framework versions. Separate UI (TC-001, TC-002, TC-005) from API tests (TC-003, TC-004, TC-006, TC-007, TC-008)"</div></div>
+    <div class="tip-card" onclick="usePwTip(3)"><div class="tip-card-label">🏗 With Structure</div><div class="tip-card-text">"Include test fixtures, beforeEach/afterEach hooks, clear Arrange-Act-Assert comments, and meaningful assertion messages"</div></div>
+  </div>
+  <div class="prompt-area-wrap">
+    <textarea class="prompt-area" id="pw-prompt-input" placeholder="e.g. Convert all 8 MakroPRO basket test cases into Playwright TypeScript scripts. Use data-testid selectors, include API tests using request context, add Arrange/Act/Assert comments, and separate UI from API tests clearly..." oninput="updatePwCharCount(this)"></textarea>
+    <span class="prompt-char" id="pw-char-count">0 / 500</span>
+  </div>
+  <button class="send-btn" id="pw-send-btn" onclick="submitPwPrompt()">
+    <div class="spin" id="pw-spin" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;"></div>
+    <span id="pw-send-label">🤖 Generate Automation Scripts</span>
+  </button>
+  <p class="fn-note" style="margin-top:10px;">✦ Specify framework preferences and structural requirements for cleaner, more maintainable scripts.</p>
+</div>
+
+<!-- SCREEN 2: VS Code execution -->
+<div class="pw-screen" id="pw-screen-vscode">
+  <div class="vscode-wrap">
+    <div class="vscode-titlebar">
+      <div class="vscode-dots"><div class="vscode-dot" style="background:#ff5f57;"></div><div class="vscode-dot" style="background:#ffbd2e;"></div><div class="vscode-dot" style="background:#27c93f;"></div></div>
+      <div class="vscode-title">convert-to-scripts.py — VS Code</div>
+      <div class="vscode-badge" id="pw-vscode-status">⏳ Running...</div>
+    </div>
+    <div class="vscode-tabs">
+      <div class="vscode-tab active">convert-to-scripts.py</div>
+      <div class="vscode-tab">test_cases.json</div>
+      <div class="vscode-tab">add-to-basket.spec.ts</div>
+      <div class="vscode-tab">add_to_basket.robot</div>
+    </div>
+    <div class="vscode-body">
+      <div class="vscode-sidebar"><div class="vscode-sidebar-icon">📁</div><div class="vscode-sidebar-icon">🔍</div><div class="vscode-sidebar-icon">🔀</div><div class="vscode-sidebar-icon">🐛</div></div>
+      <div class="vscode-editor">
+        <div class="vscode-gutter" id="pw-vscode-gutter"></div>
+        <div class="vscode-code" id="pw-vscode-code"><span class="t-dim">// Initialising script generator...</span></div>
+      </div>
+    </div>
+    <div class="vscode-terminal">
+      <div class="vscode-terminal-title">⚡ TERMINAL &nbsp;<span style="color:#555;">bash</span></div>
+      <div id="pw-terminal-log"><span class="t-dim">$</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: Generated scripts -->
+<div class="pw-screen" id="pw-screen-results">
+  <div class="results-header">
+    <div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--text);">✅ Automation Scripts Generated</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'Fira Code',monospace;">8 test cases · Playwright + Robot Framework</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <div class="results-stats"><span class="rstat pass">8 UI+API tests</span><span class="rstat skip">2 frameworks</span></div>
+      <button class="reset-btn" onclick="resetPwToPrompt()">↺ New Prompt</button>
+    </div>
+  </div>
+  <!-- Framework tabs & scripts -->
   <div class="fwtabs">
     <button class="fwtab active" id="tpw" onclick="setFw('pw')">🎭 Playwright</button>
     <button class="fwtab" id="trf" onclick="setFw('rf')">🤖 Robot Framework</button>
@@ -625,16 +552,16 @@ h1 span{color:var(--accent);}
       <button class="jbtn api-j" onclick="jump('tc008',this)">TC-008 ⚡</button>
     </div>
     <div class="chead"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><span class="clang" id="fname">add-to-basket.spec.ts</span><span style="font-family:'Fira Code',monospace;font-size:10.5px;color:var(--accent)">AI Generated</span></div>
-    <div class="ph" id="ph">// Select a framework tab then click Generate ↓</div>
-    <div class="tcsecs" id="secs">
-      <div class="tcsec pw-s" id="pw-tc001"><div class="tcsec-hd"><span class="tcsec-id ui">TC-001</span><span class="tcsec-name">UI — Login → Homepage redirect</span></div><div class="tcsec-code" id="pw-tc001-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc002"><div class="tcsec-hd"><span class="tcsec-id ui">TC-002</span><span class="tcsec-name">UI — Add product to basket (success)</span></div><div class="tcsec-code" id="pw-tc002-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc003"><div class="tcsec-hd"><span class="tcsec-id api">TC-003</span><span class="tcsec-name">API — POST /api/v2/basket/items → 201</span></div><div class="tcsec-code" id="pw-tc003-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc004"><div class="tcsec-hd"><span class="tcsec-id api">TC-004</span><span class="tcsec-name">API — GET Basket — Available within SLA</span></div><div class="tcsec-code" id="pw-tc004-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc005"><div class="tcsec-hd"><span class="tcsec-id ui">TC-005</span><span class="tcsec-name">UI — Out-of-stock button disabled + 422</span></div><div class="tcsec-code" id="pw-tc005-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc006"><div class="tcsec-hd"><span class="tcsec-id api">TC-006</span><span class="tcsec-name">API — Duplicate add increments quantity</span></div><div class="tcsec-code" id="pw-tc006-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc007"><div class="tcsec-hd"><span class="tcsec-id api">TC-007</span><span class="tcsec-name">API — Unauthenticated add → 401</span></div><div class="tcsec-code" id="pw-tc007-c"></div></div>
-      <div class="tcsec pw-s" id="pw-tc008"><div class="tcsec-hd"><span class="tcsec-id api">TC-008</span><span class="tcsec-name">API — Zero / Negative Quantity Guard</span></div><div class="tcsec-code" id="pw-tc008-c"></div></div>
+    <div class="ph" id="ph" style="display:none;"></div>
+    <div class="tcsecs" id="secs" style="display:block;">
+      <div class="tcsec pw-s vis" id="pw-tc001"><div class="tcsec-hd"><span class="tcsec-id ui">TC-001</span><span class="tcsec-name">UI — Login → Homepage redirect</span></div><div class="tcsec-code" id="pw-tc001-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc002"><div class="tcsec-hd"><span class="tcsec-id ui">TC-002</span><span class="tcsec-name">UI — Add product to basket (success)</span></div><div class="tcsec-code" id="pw-tc002-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc003"><div class="tcsec-hd"><span class="tcsec-id api">TC-003</span><span class="tcsec-name">API — POST /api/v2/basket/items → 201</span></div><div class="tcsec-code" id="pw-tc003-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc004"><div class="tcsec-hd"><span class="tcsec-id api">TC-004</span><span class="tcsec-name">API — GET Basket — Available within SLA</span></div><div class="tcsec-code" id="pw-tc004-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc005"><div class="tcsec-hd"><span class="tcsec-id ui">TC-005</span><span class="tcsec-name">UI — Out-of-stock button disabled + 422</span></div><div class="tcsec-code" id="pw-tc005-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc006"><div class="tcsec-hd"><span class="tcsec-id api">TC-006</span><span class="tcsec-name">API — Duplicate add increments quantity</span></div><div class="tcsec-code" id="pw-tc006-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc007"><div class="tcsec-hd"><span class="tcsec-id api">TC-007</span><span class="tcsec-name">API — Unauthenticated add → 401</span></div><div class="tcsec-code" id="pw-tc007-c"></div></div>
+      <div class="tcsec pw-s vis" id="pw-tc008"><div class="tcsec-hd"><span class="tcsec-id api">TC-008</span><span class="tcsec-name">API — Zero / Negative Quantity Guard</span></div><div class="tcsec-code" id="pw-tc008-c"></div></div>
       <div class="tcsec rf-s" id="rf-tc001"><div class="tcsec-hd"><span class="tcsec-id ui">TC-001</span><span class="tcsec-name">UI — Login → Homepage redirect</span></div><div class="tcsec-code" id="rf-tc001-c"></div></div>
       <div class="tcsec rf-s" id="rf-tc002"><div class="tcsec-hd"><span class="tcsec-id ui">TC-002</span><span class="tcsec-name">UI — Add product to basket (success)</span></div><div class="tcsec-code" id="rf-tc002-c"></div></div>
       <div class="tcsec rf-s" id="rf-tc003"><div class="tcsec-hd"><span class="tcsec-id api">TC-003</span><span class="tcsec-name">API — POST /api/v2/basket/items → 201</span></div><div class="tcsec-code" id="rf-tc003-c"></div></div>
@@ -644,180 +571,94 @@ h1 span{color:var(--accent);}
       <div class="tcsec rf-s" id="rf-tc007"><div class="tcsec-hd"><span class="tcsec-id api">TC-007</span><span class="tcsec-name">API — Unauthenticated add → 401</span></div><div class="tcsec-code" id="rf-tc007-c"></div></div>
       <div class="tcsec rf-s" id="rf-tc008"><div class="tcsec-hd"><span class="tcsec-id api">TC-008</span><span class="tcsec-name">API — Zero / Negative Quantity Guard</span></div><div class="tcsec-code" id="rf-tc008-c"></div></div>
     </div>
-    <div style="padding:10px 14px 13px;"><button class="gbtn" onclick="genAll()"><span id="glbl">⚡ Generate All Test Cases</span></button></div>
+    <div style="padding:10px 14px 13px;"><button class="gbtn" onclick="genAll()"><span id="glbl">⚡ Load All Scripts</span></button></div>
   </div>
   <p class="fn-note">✦ Each test case is a <strong>clearly separated block</strong>. Use the jump bar to navigate instantly.</p>
+</div>
 </div>
 
 <!-- ③ Execution Run and Fix -->
 <div class="panel" id="p2">
-  <p class="fn-note" style="margin-bottom:12px;">Watch Playwright run your tests in <strong>headed mode</strong> — a real browser simulation showing every step in real time.</p>
 
-  <style>
-    /* Browser window */
-    .browser-sim{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
-    .browser-chrome{background:#1e293b;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
-    .b-dots{display:flex;gap:4px;flex-shrink:0;}
-    .b-dot{width:9px;height:9px;border-radius:50%;}
-    .browser-bar{flex:1;background:#0f172a;border-radius:5px;padding:4px 10px;display:flex;align-items:center;gap:7px;}
-    .b-lock{font-size:9px;color:#475569;}
-    .b-url{font-family:'Fira Code',monospace;font-size:10.5px;color:#94a3b8;transition:all .3s;}
-    .browser-viewport{position:relative;background:#f8fafc;overflow:hidden;height:220px;}
+<style>
+.exec-wf-steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.exec-screen{display:none;}
+.exec-screen.active{display:block;animation:fadeUp .35s ease;}
+</style>
 
-    /* Playwright toolbar */
-    .pw-toolbar{background:#1e1e2e;border-bottom:1px solid rgba(255,255,255,.08);padding:6px 12px;display:flex;align-items:center;gap:10px;}
-    .pw-logo{font-family:'Fira Code',monospace;font-size:10px;color:#a78bfa;font-weight:600;display:flex;align-items:center;gap:5px;}
-    .pw-status{font-family:'Fira Code',monospace;font-size:10px;padding:2px 9px;border-radius:4px;font-weight:600;}
-    .pw-status.running{background:rgba(245,158,11,.15);color:#f59e0b;}
-    .pw-status.passed{background:rgba(0,212,170,.15);color:#00d4aa;}
-    .pw-status.idle{background:rgba(100,116,139,.15);color:#64748b;}
-    .pw-tc{font-family:'Fira Code',monospace;font-size:10px;color:#64748b;margin-left:auto;}
+<div class="exec-wf-steps" id="exec-wf-steps">
+  <div class="ws active" id="exec-wf1"><div class="ws-num">1</div><span class="ws-label">Configure Run</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="exec-wf2"><div class="ws-num">2</div><span class="ws-label">Executing Tests</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="exec-wf3"><div class="ws-num">3</div><span class="ws-label">View Results</span></div>
+</div>
 
-    /* Viewport pages */
-    .vp-page{position:absolute;inset:0;display:none;background:#f8fafc;animation:vpIn .25s ease;}
-    .vp-page.active{display:block;}
-    @keyframes vpIn{from{opacity:0}to{opacity:1}}
+<!-- SCREEN 1: Run config prompt -->
+<div class="exec-screen active" id="exec-screen-prompt">
+  <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:6px;">⚙️ Configure your test run</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tell AI which tests to run, how to handle failures, and any environment details.</div>
 
-    /* Direct element focus styling — replaces floating overlays */
-    .pw-focus{outline:2.5px solid #7c6aff!important;box-shadow:0 0 0 4px rgba(124,106,255,.18)!important;transition:outline .15s,box-shadow .15s;position:relative;z-index:15;}
-    .pw-focus-green{outline:2.5px solid #00d4aa!important;box-shadow:0 0 0 4px rgba(0,212,170,.18)!important;transition:outline .15s,box-shadow .15s;position:relative;z-index:15;}
-    .pw-focus-click{outline:2.5px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.2)!important;transition:outline .15s,box-shadow .15s;position:relative;z-index:15;}
-    /* Cursor arrow follows focused element */
-    .pw-cursor-label{position:absolute;background:#7c6aff;color:#fff;font-family:'Fira Code',monospace;font-size:9px;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:30;white-space:nowrap;display:none;}
-    /* Click ripple stays */
+  <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;">💡 Prompt Tips — click to use</div>
+  <div class="tips-grid">
+    <div class="tip-card" onclick="useExecTip(0)"><div class="tip-card-label">▶ Run All Tests</div><div class="tip-card-text">"Run all 8 MakroPRO basket test cases in headed mode on staging environment and show me the results"</div></div>
+    <div class="tip-card" onclick="useExecTip(1)"><div class="tip-card-label">🔧 Debug Failure</div><div class="tip-card-text">"TC-005 is failing with body.reason undefined. Analyse the failure, suggest a fix, and re-run only that test"</div></div>
+    <div class="tip-card" onclick="useExecTip(2)"><div class="tip-card-label">✏️ Update Selector</div><div class="tip-card-text">"The Add to Basket button selector changed from data-testid to data-qa. Update all affected tests and re-run"</div></div>
+    <div class="tip-card" onclick="useExecTip(3)"><div class="tip-card-label">🚀 CI Pipeline</div><div class="tip-card-text">"Run the full regression suite in headless mode, generate a JUnit XML report, and fail the build if any P1 test fails"</div></div>
+  </div>
+  <div class="prompt-area-wrap">
+    <textarea class="prompt-area" id="exec-prompt-input" placeholder="e.g. Run TC-001 through TC-008 on staging. Show the browser in headed mode for UI tests. If any test fails, pause and explain what went wrong before continuing..." oninput="updateExecCharCount(this)"></textarea>
+    <span class="prompt-char" id="exec-char-count">0 / 500</span>
+  </div>
+  <button class="send-btn" id="exec-send-btn" onclick="submitExecPrompt()">
+    <div class="spin" id="exec-spin" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;"></div>
+    <span id="exec-send-label">▶ Run Tests in Headed Mode</span>
+  </button>
+  <p class="fn-note" style="margin-top:10px;">✦ AI reads your prompt, selects the right tests, configures the runner, and streams results in real time.</p>
+</div>
 
-    /* Click ripple */
-    .click-ripple{position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(124,106,255,.5);transform:translate(-50%,-50%) scale(0);animation:ripple .5s ease-out forwards;pointer-events:none;z-index:20;}
-    @keyframes ripple{to{transform:translate(-50%,-50%) scale(3);opacity:0;}}
+<!-- SCREEN 2: VS Code execution -->
+<div class="exec-screen" id="exec-screen-vscode">
+  <div class="vscode-wrap">
+    <div class="vscode-titlebar">
+      <div class="vscode-dots"><div class="vscode-dot" style="background:#ff5f57;"></div><div class="vscode-dot" style="background:#ffbd2e;"></div><div class="vscode-dot" style="background:#27c93f;"></div></div>
+      <div class="vscode-title">run-tests.py — VS Code</div>
+      <div class="vscode-badge" id="exec-vscode-status">⏳ Running...</div>
+    </div>
+    <div class="vscode-tabs">
+      <div class="vscode-tab active">run-tests.py</div>
+      <div class="vscode-tab">playwright.config.ts</div>
+      <div class="vscode-tab" style="color:#f44747;">● add-to-basket.spec.ts</div>
+    </div>
+    <div class="vscode-body">
+      <div class="vscode-sidebar"><div class="vscode-sidebar-icon">📁</div><div class="vscode-sidebar-icon">🔍</div><div class="vscode-sidebar-icon">🐛</div><div class="vscode-sidebar-icon">▶</div></div>
+      <div class="vscode-editor">
+        <div class="vscode-gutter" id="exec-vscode-gutter"></div>
+        <div class="vscode-code" id="exec-vscode-code"><span class="t-dim">// Setting up test runner...</span></div>
+      </div>
+    </div>
+    <div class="vscode-terminal">
+      <div class="vscode-terminal-title">⚡ TERMINAL &nbsp;<span style="color:#555;">npx playwright test</span></div>
+      <div id="exec-terminal-log"><span class="t-dim">$</span></div>
+    </div>
+  </div>
 
-    /* Log panel */
-    .exec-log{background:#0d1117;border-top:1px solid var(--border);padding:10px 14px;font-family:'Fira Code',monospace;font-size:11px;line-height:1.9;max-height:130px;overflow-y:auto;}
-    .log-pass{color:#00d4aa;}.log-fail{color:#ff6b6b;}.log-info{color:#67e8f9;}.log-warn{color:#f59e0b;}.log-dim{color:#475569;}.log-step{color:#a78bfa;}
-
-    /* Run controls */
-    .run-controls{padding:12px 14px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .run-btn-main{padding:8px 18px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:8px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
-    .run-btn-main:hover{opacity:.9;}
-    .run-btn-main:disabled{opacity:.45;cursor:not-allowed;}
-    .tc-select{padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;cursor:pointer;outline:none;}
-    .run-speed{padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;cursor:pointer;outline:none;}
-    .run-result{font-family:'Fira Code',monospace;font-size:11px;margin-left:auto;padding:4px 10px;border-radius:5px;}
-
-    /* Mock page styles */
-    .mock-nav{height:36px;background:#cc0000;display:flex;align-items:center;padding:0 14px;gap:10px;}
-    .mock-logo{color:#fff;font-weight:800;font-size:13px;letter-spacing:-.02em;}
-    .mock-basket{margin-left:auto;background:rgba(255,255,255,.15);border-radius:5px;padding:4px 10px;color:#fff;font-size:11px;display:flex;align-items:center;gap:5px;}
-    .mock-basket-count{background:#fff;color:#cc0000;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;}
-    .mock-body{padding:14px;}
-    .mock-product-card{display:flex;gap:12px;background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
-    .mock-thumb{width:56px;height:56px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
-    .mock-prod-name{font-size:12px;font-weight:700;color:#1e293b;margin-bottom:3px;}
-    .mock-prod-price{font-size:11px;color:#64748b;margin-bottom:8px;}
-    .mock-add-btn{padding:5px 12px;background:#cc0000;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;}
-    .mock-add-btn.disabled{background:#94a3b8;cursor:not-allowed;}
-    .mock-toast{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;display:none;z-index:30;}
-    .mock-login-form{background:#fff;border-radius:8px;padding:16px;margin:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
-    .mock-field{border:1.5px solid #e2e8f0;border-radius:5px;padding:6px 10px;font-size:11px;color:#1e293b;width:100%;margin-bottom:7px;outline:none;}
-    .mock-field.focused{border-color:#7c6aff;box-shadow:0 0 0 2px rgba(124,106,255,.15);}
-    .mock-login-btn{width:100%;padding:7px;background:#cc0000;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;}
-    .cursor-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(124,106,255,.8);border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.3);pointer-events:none;z-index:25;transition:all .4s cubic-bezier(.4,0,.2,1);}
-  </style>
-
-  <!-- Browser simulation -->
+  <!-- Browser simulation below VS Code -->
+  <div style="font-size:12px;font-weight:600;color:var(--muted);margin:10px 0 6px;display:flex;align-items:center;gap:6px;">
+    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#27c93f;animation:blink 1s step-end infinite;"></span>
+    Live Browser (headed mode)
+  </div>
   <div class="browser-sim">
-
-    <!-- Playwright toolbar -->
-    <div class="pw-toolbar">
-      <div class="pw-logo">🎭 Playwright</div>
-      <div class="pw-status idle" id="pw-status">● IDLE</div>
-      <div class="pw-tc" id="pw-tc-label">Select a test to run</div>
-    </div>
-
-    <!-- Chrome bar -->
-    <div class="browser-chrome">
-      <div class="b-dots">
-        <div class="b-dot" style="background:#ff5f57"></div>
-        <div class="b-dot" style="background:#ffbd2e"></div>
-        <div class="b-dot" style="background:#27c93f"></div>
-      </div>
-      <div class="browser-bar">
-        <span class="b-lock">🔒</span>
-        <span class="b-url" id="b-url">about:blank</span>
-      </div>
-    </div>
-
-    <!-- Viewport -->
+    <div class="pw-toolbar"><div class="pw-logo">🎭 Playwright</div><div class="pw-status idle" id="pw-status">● IDLE</div><div class="pw-tc" id="pw-tc-label">Waiting...</div></div>
+    <div class="browser-chrome"><div class="b-dots"><div class="b-dot" style="background:#ff5f57"></div><div class="b-dot" style="background:#ffbd2e"></div><div class="b-dot" style="background:#27c93f"></div></div><div class="browser-bar"><span class="b-lock">🔒</span><span class="b-url" id="b-url">about:blank</span></div></div>
     <div class="browser-viewport" id="viewport">
-
-      <!-- Blank state -->
-      <div class="vp-page active" id="vp-blank" style="display:flex;align-items:center;justify-content:center;background:#1e293b;">
-        <div style="text-align:center;color:#475569;">
-          <div style="font-size:32px;margin-bottom:8px;">🎭</div>
-          <div style="font-family:'Fira Code',monospace;font-size:11px;">Select a test and click Run</div>
-        </div>
-      </div>
-
-      <!-- Login page -->
-      <div class="vp-page" id="vp-login">
-        <div class="mock-nav"><div class="mock-logo">Makro PRO</div><div class="mock-basket">🛒 <div class="mock-basket-count" id="basket-count-login">0</div></div></div>
-        <div class="mock-body">
-          <div class="mock-login-form">
-            <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">Sign In</div>
-            <input class="mock-field" id="mock-email" placeholder="Email address" readonly/>
-            <input class="mock-field" id="mock-password" placeholder="Password" type="password" readonly/>
-            <button class="mock-login-btn" id="mock-login-btn">Login</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Home page -->
-      <div class="vp-page" id="vp-home">
-        <div class="mock-nav"><div class="mock-logo">Makro PRO</div><div style="color:rgba(255,255,255,.7);font-size:11px;margin-left:8px;">Welcome, Customer</div><div class="mock-basket" style="margin-left:auto;">🛒 <div class="mock-basket-count" id="basket-count-home">0</div></div></div>
-        <div class="mock-body">
-          <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px;">Featured Products</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div style="background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;" id="mock-product-tile" onclick="goToProduct()">
-              <div style="font-size:22px;text-align:center;margin-bottom:5px;">🌾</div>
-              <div style="font-size:11px;font-weight:600;color:#1e293b;">Thai Jasmine Rice 5kg</div>
-              <div style="font-size:10px;color:#64748b;">฿189.00</div>
-            </div>
-            <div style="background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
-              <div style="font-size:22px;text-align:center;margin-bottom:5px;">🥛</div>
-              <div style="font-size:11px;font-weight:600;color:#1e293b;">Fresh Milk 1L</div>
-              <div style="font-size:10px;color:#64748b;">฿42.00</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product page -->
-      <div class="vp-page" id="vp-product">
-        <div class="mock-nav"><div class="mock-logo">Makro PRO</div><div class="mock-basket" style="margin-left:auto;">🛒 <div class="mock-basket-count" id="basket-count-product">0</div></div></div>
-        <div class="mock-body">
-          <div class="mock-product-card">
-            <div class="mock-thumb">🌾</div>
-            <div style="flex:1">
-              <div class="mock-prod-name">Thai Jasmine Rice 5kg</div>
-              <div class="mock-prod-price">฿189.00 · SKU: MKP-RICE-001</div>
-              <button class="mock-add-btn" id="mock-add-btn" onclick="simulateAdd()">Add to Basket</button>
-            </div>
-          </div>
-          <div style="background:#fff;border-radius:8px;padding:10px;margin-top:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
-            <div style="font-size:11px;font-weight:600;color:#1e293b;margin-bottom:4px;">Product Details</div>
-            <div style="font-size:10.5px;color:#64748b;line-height:1.6;">Premium long-grain jasmine rice from Thailand. Ideal for everyday cooking. Sold per 5kg bag.</div>
-          </div>
-        </div>
-        <div class="mock-toast" id="mock-toast">✅ Product added to basket!</div>
-      </div>
-
-      <!-- Cursor label (follows active element) -->
-      <div class="pw-cursor-label" id="cursor-label">▶ cursor</div>
+      <div class="vp-page active" id="vp-blank" style="display:flex;align-items:center;justify-content:center;background:#1e293b;"><div style="text-align:center;color:#475569;"><div style="font-size:32px;margin-bottom:8px;">🎭</div><div style="font-family:'Fira Code',monospace;font-size:11px;">Waiting for test run...</div></div></div>
+      <div class="vp-page" id="vp-login"><div class="mock-nav"><div class="mock-logo">Makro PRO</div><div class="mock-basket" style="margin-left:auto;">🛒 <div class="mock-basket-count" id="basket-count-login">0</div></div></div><div class="mock-body"><div class="mock-login-form"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">Sign In</div><input class="mock-field" id="mock-email" placeholder="Email address" readonly/><input class="mock-field" id="mock-password" placeholder="Password" type="password" readonly/><button class="mock-login-btn" id="mock-login-btn">Login</button></div></div></div>
+      <div class="vp-page" id="vp-home"><div class="mock-nav"><div class="mock-logo">Makro PRO</div><div style="color:rgba(255,255,255,.7);font-size:11px;margin-left:8px;">Welcome, Customer</div><div class="mock-basket" style="margin-left:auto;">🛒 <div class="mock-basket-count" id="basket-count-home">0</div></div></div><div class="mock-body"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px;">Featured Products</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div style="background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);"><div style="font-size:22px;text-align:center;margin-bottom:5px;">🌾</div><div style="font-size:11px;font-weight:600;color:#1e293b;">Thai Jasmine Rice 5kg</div><div style="font-size:10px;color:#64748b;">฿189.00</div></div><div style="background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);"><div style="font-size:22px;text-align:center;margin-bottom:5px;">🥛</div><div style="font-size:11px;font-weight:600;color:#1e293b;">Fresh Milk 1L</div><div style="font-size:10px;color:#64748b;">฿42.00</div></div></div></div></div>
+      <div class="vp-page" id="vp-product"><div class="mock-nav"><div class="mock-logo">Makro PRO</div><div class="mock-basket" style="margin-left:auto;">🛒 <div class="mock-basket-count" id="basket-count-product">0</div></div></div><div class="mock-body"><div class="mock-product-card"><div class="mock-thumb">🌾</div><div style="flex:1"><div class="mock-prod-name">Thai Jasmine Rice 5kg</div><div class="mock-prod-price">฿189.00 · SKU: MKP-RICE-001</div><button class="mock-add-btn" id="mock-add-btn" onclick="simulateAdd()">Add to Basket</button></div></div></div><div class="mock-toast" id="mock-toast">✅ Product added to basket!</div></div>
+      <div class="pw-cursor-label" id="cursor-label">🖱 playwright</div>
     </div>
-
-    <!-- Execution log -->
-    <div class="exec-log" id="exec-log"><span class="log-dim">// Execution log will appear here...</span></div>
-
-    <!-- Controls -->
+    <div class="exec-log" id="exec-log"><span class="log-dim">// Waiting for test execution...</span></div>
     <div class="run-controls">
       <select class="tc-select" id="tc-select">
         <option value="tc001">TC-001 · Login Flow (UI)</option>
@@ -838,48 +679,111 @@ h1 span{color:var(--accent);}
       <span class="run-result" id="run-result" style="display:none;"></span>
     </div>
   </div>
+</div>
 
-  <!-- AI Chat -->
-  <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">Ask AI to fix or update tests</div>
+<!-- SCREEN 3: AI chat fix -->
+<div class="exec-screen" id="exec-screen-results">
+  <div class="results-header">
+    <div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--text);">🔧 Ask AI to Fix or Update Tests</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Plain English — no IDE required</div>
+    </div>
+    <button class="reset-btn" onclick="resetExecToPrompt()">↺ New Run</button>
+  </div>
   <div class="chatbox">
-    <div class="chatmsgs" id="cms"><div class="msg"><div class="av avai">AI</div><div class="bbl">Hi! I can run your UI or API tests, fix failures, update selectors, and explain results in plain English. What do you need?</div></div></div>
+    <div class="chatmsgs" id="cms"><div class="msg"><div class="av avai">AI</div><div class="bbl">Tests complete! I can fix failures, update selectors, explain errors, or add new test cases. What do you need?</div></div></div>
     <div class="ql">
-      <button class="qb" onclick="sq(this,0)">
-        <span class="qb-icon" style="background:rgba(0,212,170,.15);color:var(--accent);">▶</span>
-        <span class="qb-text">Run all MakroPRO basket tests</span>
-        <span class="qb-arrow">›</span>
-      </button>
-      <button class="qb" onclick="sq(this,1)">
-        <span class="qb-icon" style="background:rgba(255,107,107,.15);color:var(--accent3);">🔧</span>
-        <span class="qb-text">TC-005 is failing — what went wrong?</span>
-        <span class="qb-arrow">›</span>
-      </button>
-      <button class="qb" onclick="sq(this,2)">
-        <span class="qb-icon" style="background:rgba(245,158,11,.15);color:var(--amber);">✏️</span>
-        <span class="qb-text">The "Add to Basket" button selector changed</span>
-        <span class="qb-arrow">›</span>
-      </button>
-      <button class="qb" onclick="sq(this,3)">
-        <span class="qb-icon" style="background:rgba(124,106,255,.15);color:var(--accent2);">📋</span>
-        <span class="qb-text">Add API test for DELETE /api/v2/basket/items/{id}</span>
-        <span class="qb-arrow">›</span>
-      </button>
+      <button class="qb" onclick="sq(this,0)"><span class="qb-icon" style="background:rgba(0,212,170,.15);color:var(--accent);">▶</span><span class="qb-text">Run all MakroPRO basket tests</span><span class="qb-arrow">›</span></button>
+      <button class="qb" onclick="sq(this,1)"><span class="qb-icon" style="background:rgba(255,107,107,.15);color:var(--accent3);">🔧</span><span class="qb-text">TC-005 is failing — what went wrong?</span><span class="qb-arrow">›</span></button>
+      <button class="qb" onclick="sq(this,2)"><span class="qb-icon" style="background:rgba(245,158,11,.15);color:var(--amber);">✏️</span><span class="qb-text">The "Add to Basket" button selector changed</span><span class="qb-arrow">›</span></button>
+      <button class="qb" onclick="sq(this,3)"><span class="qb-icon" style="background:rgba(124,106,255,.15);color:var(--accent2);">📋</span><span class="qb-text">Add API test for DELETE /api/v2/basket/items/{id}</span><span class="qb-arrow">›</span></button>
     </div>
   </div>
   <p class="fn-note">✦ Non-technical QAs can manage <strong>UI and API automation</strong> through natural language — no IDE required.</p>
 </div>
+</div>
 
 <!-- ④ Reports — Full detailed -->
 <div class="panel" id="p3">
-  <button class="abtn" id="rpt-btn" onclick="generateReport()" style="background:linear-gradient(135deg,#7c6aff,#00d4aa);margin-bottom:8px;">
-    <div class="spin" id="rpt-spin"></div>
-    <span id="rpt-lbl">✦ Generate Awesome Test Report</span>
+
+<style>
+.rpt-wf-steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+.rpt-ws{display:none;}
+.rpt-ws.active{display:block;animation:fadeUp .35s ease;}
+</style>
+
+<div class="rpt-wf-steps" id="rpt-wf-steps">
+  <div class="ws active" id="rpt-wf1"><div class="ws-num">1</div><span class="ws-label">Report Prompt</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="rpt-wf2"><div class="ws-num">2</div><span class="ws-label">AI Compiling</span></div>
+  <span class="ws-sep">→</span>
+  <div class="ws idle" id="rpt-wf3"><div class="ws-num">3</div><span class="ws-label">View Report</span></div>
+</div>
+
+<!-- SCREEN 1: Report prompt -->
+<div class="rpt-ws active" id="rpt-screen-prompt">
+  <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:6px;">📊 Describe the report you need</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tell AI what kind of report to generate, who it's for, and what insights to highlight.</div>
+
+  <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;">💡 Prompt Tips — click to use</div>
+  <div class="tips-grid">
+    <div class="tip-card" onclick="useRptTip(0)"><div class="tip-card-label">📋 Daily Report</div><div class="tip-card-text">"Generate a daily test report for the MakroPRO basket feature. Include pass/fail summary, screenshots, and AI recommendations"</div></div>
+    <div class="tip-card" onclick="useRptTip(1)"><div class="tip-card-label">👔 Stakeholder</div><div class="tip-card-text">"Create an executive summary report highlighting critical failures, release readiness, and risk assessment for Thursday's release"</div></div>
+    <div class="tip-card" onclick="useRptTip(2)"><div class="tip-card-label">🐛 Bug Report</div><div class="tip-card-text">"List all failed tests with root cause analysis, affected components, severity, and Jira ticket suggestions"</div></div>
+    <div class="tip-card" onclick="useRptTip(3)"><div class="tip-card-label">📈 Trend Report</div><div class="tip-card-text">"Show test coverage trends, flaky tests, SLA compliance for API response times, and regression history"</div></div>
+  </div>
+  <div class="prompt-area-wrap">
+    <textarea class="prompt-area" id="rpt-prompt-input" placeholder="e.g. Generate a daily test report for today's basket feature regression run. Include a pass/fail summary by layer (UI and API), screenshots for failed tests, AI root cause analysis for each failure, and action items for the team before Thursday's release..." oninput="updateRptCharCount(this)"></textarea>
+    <span class="prompt-char" id="rpt-char-count">0 / 500</span>
+  </div>
+  <button class="send-btn" id="rpt-send-btn" onclick="submitRptPrompt()">
+    <div class="spin" id="rpt-gen-spin" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;"></div>
+    <span id="rpt-send-label">✦ Generate Awesome Test Report</span>
   </button>
-  <div id="rpt-content" style="display:none;">
+  <p class="fn-note" style="margin-top:10px;">✦ Describe your audience and goals — a report for developers looks different from one for stakeholders.</p>
+</div>
+
+<!-- SCREEN 2: VS Code compiling -->
+<div class="rpt-ws" id="rpt-screen-vscode">
+  <div class="vscode-wrap">
+    <div class="vscode-titlebar">
+      <div class="vscode-dots"><div class="vscode-dot" style="background:#ff5f57;"></div><div class="vscode-dot" style="background:#ffbd2e;"></div><div class="vscode-dot" style="background:#27c93f;"></div></div>
+      <div class="vscode-title">generate-report.py — VS Code</div>
+      <div class="vscode-badge" id="rpt-vscode-status">⏳ Compiling...</div>
+    </div>
+    <div class="vscode-tabs">
+      <div class="vscode-tab active">generate-report.py</div>
+      <div class="vscode-tab">test_results.json</div>
+      <div class="vscode-tab">daily_report.html</div>
+    </div>
+    <div class="vscode-body">
+      <div class="vscode-sidebar"><div class="vscode-sidebar-icon">📁</div><div class="vscode-sidebar-icon">🔍</div><div class="vscode-sidebar-icon">📊</div><div class="vscode-sidebar-icon">📤</div></div>
+      <div class="vscode-editor">
+        <div class="vscode-gutter" id="rpt-vscode-gutter"></div>
+        <div class="vscode-code" id="rpt-vscode-code"><span class="t-dim">// Compiling test results...</span></div>
+      </div>
+    </div>
+    <div class="vscode-terminal">
+      <div class="vscode-terminal-title">⚡ TERMINAL &nbsp;<span style="color:#555;">python generate-report.py</span></div>
+      <div id="rpt-terminal-log"><span class="t-dim">$</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: Report -->
+<div class="rpt-ws" id="rpt-screen-results">
+  <div class="results-header">
+    <div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--text);">📊 Report Generated</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'Fira Code',monospace;" id="rdate">Loading...</div>
+    </div>
+    <button class="reset-btn" onclick="resetRptToPrompt()">↺ New Report</button>
+  </div>
+  <div id="rpt-content">
   <div class="rpt-hdr">
     <div class="rpt-top">
       <div class="brand"><div class="brand-icon">🛒</div><div><div class="brand-name">MakroPRO Daily Test Report</div><div class="brand-sub">Add to Basket — UI &amp; API Suite</div></div></div>
-      <div class="rpt-meta"><div class="auto-badge">AUTO GENERATED</div><div class="meta-line" id="rdate">Loading...</div><div class="meta-line">Build: #2847 · Branch: main</div></div>
+      <div class="rpt-meta"><div class="auto-badge">AUTO GENERATED</div><div class="meta-line">Build: #2847 · Branch: main</div></div>
     </div>
     <div class="sum-row">
       <div class="sum-card tot"><span class="sum-num">8</span><span class="sum-lbl">Total</span></div>
@@ -896,50 +800,22 @@ h1 span{color:var(--accent);}
     <button class="fbtn fsk" onclick="rf2('skip',this)">⚠ Skipped (1)</button>
   </div>
   <div class="tc-list">
-    <div class="tc-row" data-status="pass" id="rr1"><div class="tc-row-head" onclick="rt('rr1')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-001 · Login → homepage redirect</div><div class="tc-desc">Valid credentials → HTTP 200 → /home, basket icon visible</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-pass">PASSED</span><span class="dur">1.24s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid">
-        <div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to <span class="sc">makropro.th/login</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Fill email <span class="sc">customer@test.com</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Fill password and click Login</span></div><div class="step-item"><span>✅</span><span class="step-text">Assert URL = <span class="sc">/home</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert basket icon visible</span></div></div></div>
-        <div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/home</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="190" y="4" width="66" height="15" rx="7" fill="#1e3a4a"/><text x="206" y="15" font-family="monospace" font-size="7" fill="#00d4aa">🛒 Basket</text><rect x="232" y="4" width="20" height="15" rx="3" fill="rgba(0,212,170,.2)" stroke="#00d4aa" stroke-width="1"/><text x="237" y="14.5" font-family="monospace" font-size="8" fill="#00d4aa">✓</text><rect x="8" y="30" width="90" height="7" rx="2" fill="#334155" opacity=".7"/><rect x="8" y="43" width="70" height="5" rx="2" fill="#1e293b"/><rect x="8" y="55" width="50" height="15" rx="4" fill="rgba(0,212,170,.25)"/><text x="14" y="66" font-family="monospace" font-size="6.5" fill="#00d4aa">Shop Now</text><rect x="150" y="28" width="33" height="33" rx="4" fill="#1e293b"/><rect x="192" y="28" width="33" height="33" rx="4" fill="#1e293b"/><rect x="234" y="28" width="52" height="33" rx="4" fill="#1e293b"/><text x="158" y="49" font-family="monospace" font-size="13">🌾</text><text x="200" y="49" font-family="monospace" font-size="13">🥛</text><text x="244" y="49" font-family="monospace" font-size="13">🥩</text><rect y="82" width="300" height="14" fill="rgba(0,212,170,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#00d4aa">✅ /home loaded · basket icon found</text></svg><div class="ss-lbl">After Login</div></div></div></div>
-        <div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">page.url()</span> <span class="ad">===</span> <span class="ap">"https://www.makropro.th/home"</span><br><span class="ap">✓</span> <span class="ai">locator('[data-testid="basket-icon"]')</span> <span class="ad">toBeVisible()</span> <span class="ap">→ visible</span></div></div>
-      </div></div>
-    </div>
-    <div class="tc-row" data-status="pass" id="rr2"><div class="tc-row-head" onclick="rt('rr2')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-002 · Add product to basket — success</div><div class="tc-desc">Click "Add to Basket" → count +1, toast visible ≤ 2s</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-pass">PASSED</span><span class="dur">2.41s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid">
-        <div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to Thai Jasmine Rice product page</span></div><div class="step-item"><span>✅</span><span class="step-text">Click <span class="sc">[data-testid="add-to-basket-btn"]</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert basket count = <span class="sc">"1"</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert confirmation toast visible at 1.8s</span></div></div></div>
-        <div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/products/thai-jasmine-rice</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="256" y="4" width="34" height="15" rx="7" fill="#1e3a4a"/><text x="262" y="14" font-family="monospace" font-size="7.5" fill="#00d4aa">🛒 1</text><rect x="8" y="27" width="60" height="58" rx="5" fill="#1e293b"/><text x="22" y="60" font-family="monospace" font-size="22">🌾</text><rect x="76" y="29" width="110" height="9" rx="2" fill="#334155"/><rect x="76" y="66" width="88" height="16" rx="4" fill="rgba(0,212,170,.22)" stroke="#00d4aa" stroke-width="1"/><text x="88" y="77" font-family="monospace" font-size="6.5" fill="#00d4aa">✓ Added to Basket</text><rect x="54" y="2" width="148" height="18" rx="5" fill="rgba(0,212,170,.18)" stroke="#00d4aa" stroke-width="1"/><text x="66" y="14" font-family="monospace" font-size="7.5" fill="#00d4aa">✅ Product added to basket!</text><rect y="82" width="300" height="14" fill="rgba(0,212,170,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#00d4aa">✅ Toast at 1.8s · count = 1 (SLA ≤ 2s)</text></svg><div class="ss-lbl">Post Add-to-Basket</div></div></div></div>
-        <div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">locator('[data-testid="basket-count"]')</span> <span class="ad">toHaveText()</span> <span class="ap">→ "1"</span><br><span class="ap">✓</span> <span class="ai">locator('[data-testid="confirm-toast"]')</span> <span class="ad">toBeVisible()</span> <span class="ap">→ visible at 1.8s</span></div></div>
-      </div></div>
-    </div>
-    <div class="tc-row" data-status="pass" id="rr3"><div class="tc-row-head" onclick="rt('rr3')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-003 · POST /api/v2/basket/items → 201</div><div class="tc-desc">Valid payload + auth → 201, product_id, quantity, status: available</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.38s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">POST</span> /api/v2/basket/items<br><span class="ad">Authorization: Bearer ••••••••</span><br><span class="ad">{ "product_id": </span><span class="ap">"MKP-RICE-001"</span><span class="ad">, "quantity": </span><span class="ap">1</span><span class="ad"> }</span></div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="ap">HTTP 201 Created</span> <span class="ad">· 380ms</span><br><span class="ad">{ "product_id": </span><span class="ap">"MKP-RICE-001"</span><span class="ad">, "status": </span><span class="ap">"available"</span><span class="ad"> }</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">status</span> <span class="ad">===</span> <span class="ap">201</span><br><span class="ap">✓</span> <span class="ai">body.product_id</span> <span class="ad">===</span> <span class="ap">"MKP-RICE-001"</span><br><span class="ap">✓</span> <span class="ai">body.status</span> <span class="ad">===</span> <span class="ap">"available"</span></div></div></div></div>
-    </div>
-    <div class="tc-row" data-status="pass" id="rr4"><div class="tc-row-head" onclick="rt('rr4')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-004 · GET basket — available within 3s</div><div class="tc-desc">GET /api/v2/basket → 200, status: available, within SLA</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.61s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">GET</span> /api/v2/basket<br><span class="ad">Authorization: Bearer ••••••••</span></div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="ap">HTTP 200 OK</span> <span class="ad">· 610ms</span><br><span class="ad">"items":[{"status":</span><span class="ap">"available"</span><span class="ad">}]</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">status</span> <span class="ad">===</span> <span class="ap">200</span><br><span class="ap">✓</span> <span class="ai">items[0].status</span> <span class="ad">===</span> <span class="ap">"available"</span><br><span class="ap">✓</span> <span class="ai">responseTime 610ms</span> <span class="ad">≤ SLA 3000ms</span></div></div></div></div>
-    </div>
-    <div class="tc-row r-fail open" data-status="fail" id="rr5"><div class="tc-row-head" onclick="rt('rr5')"><div class="si-icon si-fail">❌</div><div class="tc-info"><div class="tc-name">TC-005 · Out-of-stock — button disabled + 422</div><div class="tc-desc">API returned 422 but missing reason field in staging</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-api">API</span><span class="rtag rt-fail">FAILED</span><span class="dur">1.02s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid">
-        <div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to out-of-stock product page</span></div><div class="step-item"><span>✅</span><span class="step-text">Assert button <span class="sc">toBeDisabled()</span> → passed</span></div><div class="step-item"><span>✅</span><span class="step-text">POST to API with out-of-stock product_id</span></div><div class="step-item"><span>❌</span><span class="step-text fs">Assert <span class="sc">body.reason === "out_of_stock"</span> → field missing</span></div></div></div>
-        <div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/products/out-of-stock-item</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="8" y="27" width="60" height="58" rx="5" fill="#1e293b"/><text x="22" y="60" font-family="monospace" font-size="22" opacity=".35">📦</text><rect x="8" y="27" width="60" height="58" rx="5" fill="rgba(255,107,107,.06)" stroke="rgba(255,107,107,.3)" stroke-width="1"/><text x="12" y="92" font-family="monospace" font-size="6.5" fill="#ff6b6b">Out of Stock</text><rect x="76" y="29" width="110" height="9" rx="2" fill="#334155"/><rect x="76" y="66" width="90" height="16" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/><text x="86" y="77" font-family="monospace" font-size="6.5" fill="#475569">Add to Basket</text><rect x="75" y="65" width="92" height="18" rx="4" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/><rect y="82" width="300" height="14" fill="rgba(255,107,107,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#ff6b6b">✅ Button disabled · ❌ reason field missing</text></svg><div class="ss-lbl">Out-of-Stock State</div></div></div></div>
-        <div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">button</span> <span class="ad">toBeDisabled()</span> <span class="ap">→ disabled</span><br><span class="ap">✓</span> <span class="ai">response.status</span> <span class="ad">===</span> <span class="ap">422</span><br><span class="af">✗</span> <span class="ai">body.reason</span> <span class="ad">===</span> <span class="af">"out_of_stock"</span> <span class="ad">→ received:</span> <span class="af">undefined</span></div></div>
-        <div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt">The <strong>UI assertion passed</strong> — button is correctly disabled. The <strong>API response is missing the <code style="font-family:monospace;font-size:10.5px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px">reason</code> field</strong> in the 422 payload. Staging DB constraint fires but the error serialiser isn't mapping it. Suggested Jira: <em>"Staging: 422 reason field missing — POST /api/v2/basket/items out-of-stock"</em>. Not a blocker for UI release.</div></div></div>
-      </div></div>
-    </div>
-    <div class="tc-row" data-status="pass" id="rr6"><div class="tc-row-head" onclick="rt('rr6')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-006 · Duplicate add — quantity increments</div><div class="tc-desc">Add same product twice → qty = 2, one item in basket</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.72s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Requests</div><div class="assert-box" style="font-size:10.5px;"><span class="ad">[1]</span> <span class="ai">POST</span> /basket/items <span class="ap">→ 201</span><br><span class="ad">[2]</span> <span class="ai">POST</span> /basket/items <span class="ap">→ 200 (merged)</span><br><span class="ad">[3]</span> <span class="ai">GET</span>  /basket <span class="ap">→ 200</span></div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="ad">"items":[{"quantity":</span><span class="ap">2</span><span class="ad">}]</span> <span class="ad">length:</span><span class="ap">1</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">items.filter(MKP-RICE-001).length</span> <span class="ad">===</span> <span class="ap">1</span><br><span class="ap">✓</span> <span class="ai">items[0].quantity</span> <span class="ad">===</span> <span class="ap">2</span></div></div></div></div>
-    </div>
-    <div class="tc-row r-fail" data-status="fail" id="rr7"><div class="tc-row-head" onclick="rt('rr7')"><div class="si-icon si-fail">❌</div><div class="tc-info"><div class="tc-name">TC-007 · Unauthenticated add → 401</div><div class="tc-desc">No auth token → expected 401, received 500 Internal Server Error</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-fail">FAILED</span><span class="dur">0.29s</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">POST</span> /api/v2/basket/items<br><span class="ad">Authorization: </span><span class="af">(none)</span><br><span class="ad">{ "product_id": "MKP-RICE-001" }</span></div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="af">HTTP 500 Internal Server Error</span><br><span class="ad">{ "error": </span><span class="af">"NullReferenceException"</span><span class="ad"> }</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="af">✗</span> <span class="ai">status</span> <span class="ad">===</span> <span class="af">401</span> <span class="ad">→ received:</span> <span class="af">500</span><br><span class="af">✗</span> <span class="ai">body.error</span> <span class="ad">===</span> <span class="af">"unauthorized"</span> <span class="ad">→ received:</span> <span class="af">"NullReferenceException"</span></div></div><div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt"><strong>Critical bug.</strong> API throws unhandled <code style="font-family:monospace;font-size:10.5px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px">NullReferenceException</code> instead of <strong>401 Unauthorized</strong>. Auth middleware is not executing before the controller accesses user context. <strong style="color:var(--accent3)">HIGH severity</strong> — exposes internal stack traces to unauthenticated callers. Fix required before production deployment.</div></div></div></div></div>
-    </div>
-    <div class="tc-row" data-status="skip" id="rr8"><div class="tc-row-head" onclick="rt('rr8')"><div class="si-icon si-skip">⚠</div><div class="tc-info"><div class="tc-name">TC-008 · Zero / negative quantity guard</div><div class="tc-desc">Skipped — staging rate limit reached for this suite run</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-skip">SKIPPED</span><span class="dur">—</span></div><span class="chv">▶</span></div>
-      <div class="tc-detail"><div class="dgrid"><div class="dsec full"><div class="dslabel">Skip Reason</div><div class="assert-box"><span class="ad">Staging API rate limit (100 req/min) exceeded. TC-008 retried in next run at 10:00 AM.</span></div></div><div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt">Skipped due to rate limit, not a product defect. Consider <strong>splitting the suite into parallel workers</strong> or mocking the API layer for this TC to avoid hitting the 100 req/min ceiling.</div></div></div></div></div>
-    </div>
+    <div class="tc-row" data-status="pass" id="rr1"><div class="tc-row-head" onclick="rt('rr1')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-001 · Login → homepage redirect</div><div class="tc-desc">Valid credentials → HTTP 200 → /home, basket icon visible</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-pass">PASSED</span><span class="dur">1.24s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to <span class="sc">makropro.th/login</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Fill email <span class="sc">customer@test.com</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Fill password and click Login</span></div><div class="step-item"><span>✅</span><span class="step-text">Assert URL = <span class="sc">/home</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert basket icon visible</span></div></div></div><div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/home</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="190" y="4" width="66" height="15" rx="7" fill="#1e3a4a"/><text x="206" y="15" font-family="monospace" font-size="7" fill="#00d4aa">🛒 Basket</text><rect x="232" y="4" width="20" height="15" rx="3" fill="rgba(0,212,170,.2)" stroke="#00d4aa" stroke-width="1"/><text x="237" y="14.5" font-family="monospace" font-size="8" fill="#00d4aa">✓</text><rect x="8" y="30" width="90" height="7" rx="2" fill="#334155" opacity=".7"/><rect x="8" y="43" width="70" height="5" rx="2" fill="#1e293b"/><rect x="8" y="55" width="50" height="15" rx="4" fill="rgba(0,212,170,.25)"/><text x="14" y="66" font-family="monospace" font-size="6.5" fill="#00d4aa">Shop Now</text><rect x="150" y="28" width="33" height="33" rx="4" fill="#1e293b"/><rect x="192" y="28" width="33" height="33" rx="4" fill="#1e293b"/><rect x="234" y="28" width="52" height="33" rx="4" fill="#1e293b"/><text x="158" y="49" font-family="monospace" font-size="13">🌾</text><text x="200" y="49" font-family="monospace" font-size="13">🥛</text><text x="244" y="49" font-family="monospace" font-size="13">🥩</text><rect y="82" width="300" height="14" fill="rgba(0,212,170,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#00d4aa">✅ /home loaded · basket icon found</text></svg><div class="ss-lbl">After Login</div></div></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">page.url()</span> <span class="ad">===</span> <span class="ap">"https://www.makropro.th/home"</span><br><span class="ap">✓</span> <span class="ai">locator('[data-testid="basket-icon"]')</span> <span class="ad">toBeVisible()</span> <span class="ap">→ visible</span></div></div></div></div></div>
+    <div class="tc-row" data-status="pass" id="rr2"><div class="tc-row-head" onclick="rt('rr2')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-002 · Add product to basket — success</div><div class="tc-desc">Click "Add to Basket" → count +1, toast visible ≤ 2s</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-pass">PASSED</span><span class="dur">2.41s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to Thai Jasmine Rice product page</span></div><div class="step-item"><span>✅</span><span class="step-text">Click <span class="sc">[data-testid="add-to-basket-btn"]</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert basket count = <span class="sc">"1"</span></span></div><div class="step-item"><span>✅</span><span class="step-text">Assert confirmation toast visible at 1.8s</span></div></div></div><div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/products/thai-jasmine-rice</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="256" y="4" width="34" height="15" rx="7" fill="#1e3a4a"/><text x="262" y="14" font-family="monospace" font-size="7.5" fill="#00d4aa">🛒 1</text><rect x="8" y="27" width="60" height="58" rx="5" fill="#1e293b"/><text x="22" y="60" font-family="monospace" font-size="22">🌾</text><rect x="76" y="29" width="110" height="9" rx="2" fill="#334155"/><rect x="76" y="66" width="88" height="16" rx="4" fill="rgba(0,212,170,.22)" stroke="#00d4aa" stroke-width="1"/><text x="88" y="77" font-family="monospace" font-size="6.5" fill="#00d4aa">✓ Added to Basket</text><rect x="54" y="2" width="148" height="18" rx="5" fill="rgba(0,212,170,.18)" stroke="#00d4aa" stroke-width="1"/><text x="66" y="14" font-family="monospace" font-size="7.5" fill="#00d4aa">✅ Product added to basket!</text><rect y="82" width="300" height="14" fill="rgba(0,212,170,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#00d4aa">✅ Toast at 1.8s · count = 1 (SLA ≤ 2s)</text></svg><div class="ss-lbl">Post Add-to-Basket</div></div></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">locator('[data-testid="basket-count"]')</span> <span class="ad">toHaveText()</span> <span class="ap">→ "1"</span><br><span class="ap">✓</span> <span class="ai">locator('[data-testid="confirm-toast"]')</span> <span class="ad">toBeVisible()</span> <span class="ap">→ visible at 1.8s</span></div></div></div></div></div>
+    <div class="tc-row" data-status="pass" id="rr3"><div class="tc-row-head" onclick="rt('rr3')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-003 · POST /api/v2/basket/items → 201</div><div class="tc-desc">Valid payload + auth → 201, product_id, quantity, status: available</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.38s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">POST</span> /api/v2/basket/items<br><span class="ad">{ "product_id": </span><span class="ap">"MKP-RICE-001"</span><span class="ad">, "status": </span><span class="ap">"available"</span><span class="ad"> }</span></div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="ap">HTTP 201 Created · 380ms</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">status</span> <span class="ad">===</span> <span class="ap">201</span><br><span class="ap">✓</span> <span class="ai">body.status</span> <span class="ad">===</span> <span class="ap">"available"</span></div></div></div></div></div>
+    <div class="tc-row" data-status="pass" id="rr4"><div class="tc-row-head" onclick="rt('rr4')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-004 · GET basket — available within 3s</div><div class="tc-desc">GET /api/v2/basket → 200, status: available, within SLA</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.61s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">GET</span> /api/v2/basket</div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="ap">HTTP 200 OK · 610ms ≤ SLA 3000ms</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">status</span> <span class="ad">===</span> <span class="ap">200</span><br><span class="ap">✓</span> <span class="ai">responseTime 610ms ≤ SLA 3000ms</span></div></div></div></div></div>
+    <div class="tc-row r-fail open" data-status="fail" id="rr5"><div class="tc-row-head" onclick="rt('rr5')"><div class="si-icon si-fail">❌</div><div class="tc-info"><div class="tc-name">TC-005 · Out-of-stock — button disabled + 422</div><div class="tc-desc">API returned 422 but missing reason field in staging</div></div><div class="tc-tags"><span class="rtag rt-ui">UI</span><span class="rtag rt-api">API</span><span class="rtag rt-fail">FAILED</span><span class="dur">1.02s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Test Steps</div><div class="step-list"><div class="step-item"><span>✅</span><span class="step-text">Navigate to out-of-stock product</span></div><div class="step-item"><span>✅</span><span class="step-text">Assert button disabled → passed</span></div><div class="step-item"><span>❌</span><span class="step-text fs">body.reason === "out_of_stock" → undefined</span></div></div></div><div class="dsec"><div class="dslabel">Screenshot Evidence</div><div class="ss-box"><div class="ss-bar"><div class="ss-dots"><div class="ss-dot" style="background:#ff5f57"></div><div class="ss-dot" style="background:#ffbd2e"></div><div class="ss-dot" style="background:#27c93f"></div></div><div class="ss-url">makropro.th/products/out-of-stock-item</div></div><div class="ss-wrap" style="height:96px;"><svg width="100%" height="96" viewBox="0 0 300 96"><rect width="300" height="96" fill="#0f172a"/><rect width="300" height="22" fill="#1e293b"/><rect x="8" y="6" width="44" height="10" rx="2" fill="#00d4aa" opacity=".8"/><rect x="8" y="27" width="60" height="58" rx="5" fill="#1e293b"/><text x="22" y="60" font-family="monospace" font-size="22" opacity=".35">📦</text><rect x="8" y="27" width="60" height="58" rx="5" fill="rgba(255,107,107,.06)" stroke="rgba(255,107,107,.3)" stroke-width="1"/><rect x="76" y="66" width="90" height="16" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/><text x="86" y="77" font-family="monospace" font-size="6.5" fill="#475569">Add to Basket</text><rect x="75" y="65" width="92" height="18" rx="4" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/><rect y="82" width="300" height="14" fill="rgba(255,107,107,.1)"/><text x="8" y="92" font-family="monospace" font-size="7" fill="#ff6b6b">✅ Button disabled · ❌ reason field missing</text></svg><div class="ss-lbl">Out-of-Stock</div></div></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">button</span> <span class="ad">disabled</span><br><span class="ap">✓</span> <span class="ai">status</span> <span class="ad">===</span> <span class="ap">422</span><br><span class="af">✗</span> <span class="ai">body.reason</span> <span class="ad">→</span> <span class="af">undefined</span></div></div><div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt">UI passed — button correctly disabled. API 422 fires but <strong>reason field missing</strong> from response payload. Staging serialiser bug. Jira: <em>"Staging: 422 reason field missing — basket out-of-stock"</em>. Not a blocker for UI release.</div></div></div></div></div></div>
+    <div class="tc-row" data-status="pass" id="rr6"><div class="tc-row-head" onclick="rt('rr6')"><div class="si-icon si-pass">✅</div><div class="tc-info"><div class="tc-name">TC-006 · Duplicate add — quantity increments</div><div class="tc-desc">Add same product twice → qty = 2, one item</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-pass">PASSED</span><span class="dur">0.72s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="ap">✓</span> <span class="ai">items.length</span> <span class="ad">===</span> <span class="ap">1</span><br><span class="ap">✓</span> <span class="ai">items[0].quantity</span> <span class="ad">===</span> <span class="ap">2</span></div></div></div></div></div>
+    <div class="tc-row r-fail" data-status="fail" id="rr7"><div class="tc-row-head" onclick="rt('rr7')"><div class="si-icon si-fail">❌</div><div class="tc-info"><div class="tc-name">TC-007 · Unauthenticated add → 401</div><div class="tc-desc">Expected 401, received 500 Internal Server Error</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-fail">FAILED</span><span class="dur">0.29s</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec"><div class="dslabel">Request</div><div class="assert-box" style="font-size:10.5px;"><span class="ai">POST</span> /api/v2/basket/items — no auth</div></div><div class="dsec"><div class="dslabel">Response</div><div class="assert-box" style="font-size:10.5px;"><span class="af">HTTP 500 · NullReferenceException</span></div></div><div class="dsec full"><div class="dslabel">Assertions</div><div class="assert-box"><span class="af">✗</span> <span class="ai">status</span> <span class="ad">===</span> <span class="af">401 → received 500</span><br><span class="af">✗</span> <span class="ai">body.error</span> <span class="af">→ NullReferenceException</span></div></div><div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt"><strong>Critical.</strong> Auth middleware not running — exposes stack trace. <strong style="color:var(--accent3)">HIGH severity.</strong> Fix before production.</div></div></div></div></div></div>
+    <div class="tc-row" data-status="skip" id="rr8"><div class="tc-row-head" onclick="rt('rr8')"><div class="si-icon si-skip">⚠</div><div class="tc-info"><div class="tc-name">TC-008 · Zero / negative quantity guard</div><div class="tc-desc">Skipped — staging rate limit reached</div></div><div class="tc-tags"><span class="rtag rt-api">API</span><span class="rtag rt-skip">SKIPPED</span><span class="dur">—</span></div><span class="chv">▶</span></div><div class="tc-detail"><div class="dgrid"><div class="dsec full"><div class="dslabel">🤖 AI Insight</div><div class="ai-card"><div class="ai-ico">🤖</div><div class="ai-txt">Rate limit hit — not a product defect. Split suite into parallel workers or mock API layer for this TC.</div></div></div></div></div></div>
   </div>
   <div class="share-sec">
     <div><div style="font-size:12.5px;font-weight:600;color:var(--text)">Share this report</div><div style="font-size:11px;color:var(--muted)">Auto-distributed after every CI run</div></div>
     <div class="share-btns"><button class="shbtn" onclick="this.innerHTML='✓ Sent!'">📧 Email team</button><button class="shbtn" onclick="this.innerHTML='✓ Posted!'">💬 Slack #qa</button><button class="shbtn" onclick="this.innerHTML='✓ Created!'">📋 Jira bugs (2)</button></div>
   </div>
   <p class="fn-note" style="margin-top:10px;">✦ After every run, AI generates an <strong>actionable summary</strong> with evidence — shared automatically to your team.</p>
-  </div><!-- end rpt-content -->
+  </div>
+</div>
 </div>
 
 <!-- ⑤ AI + Automation Adoption -->
@@ -986,9 +862,386 @@ h1 span{color:var(--accent);}
 const panels=document.querySelectorAll('.panel'),pills=document.querySelectorAll('.pill');
 let p3i=false,p4i=false;
 function sw(i,b){panels.forEach((p,j)=>p.classList.toggle('active',j===i));pills.forEach(p=>p.classList.remove('active'));b.classList.add('active');if(i===4&&!p4i){p4i=true;setTimeout(anim,300);}}
-setTimeout(()=>{},0);// tc cards hidden until button clicked
-function analyzeReq(){const b=document.getElementById('abtn'),s=document.getElementById('sp1'),l=document.getElementById('albl');b.disabled=true;s.style.display='block';l.textContent='AI analyzing...';document.querySelectorAll('.tc-item').forEach(c=>c.classList.remove('show'));setTimeout(()=>{s.style.display='none';l.textContent='✦ 8 test cases generated';document.getElementById('tcg').style.display='block';document.getElementById('tc-footnote').style.display='block';document.querySelectorAll('.tc-item').forEach((c,i)=>setTimeout(()=>c.classList.add('show'),i*90));setTimeout(()=>{b.disabled=false;l.textContent='✦ Re-analyze requirements';},900);},1900);}
-function toggleTC(id){const el=document.getElementById(id);el.classList.toggle('open');}
+// ── Panel 2: Playwright/Robot Workflow ───────────────────
+const pwTips = [
+  'Convert all 8 MakroPRO basket test cases (TC-001 to TC-008) into Playwright TypeScript scripts.\n\nRequirements:\n- Use data-testid selectors for UI elements\n- Use request context for API tests (TC-003 to TC-008)\n- Add Arrange / Act / Assert comments in each test\n- Separate UI tests and API tests with clear section comments\n- Use beforeEach to handle login for UI tests',
+  'Generate Robot Framework keyword-driven scripts for all 8 basket test cases.\n\nRequirements:\n- Use Browser library for UI tests (TC-001, TC-002, TC-005)\n- Use RequestsLibrary for API tests (TC-003, TC-004, TC-006, TC-007, TC-008)\n- Create reusable keywords for login and basket operations\n- Include Setup and Teardown sections\n- Format with 4-space indentation',
+  'Generate both Playwright TypeScript and Robot Framework versions for all 8 test cases.\n\nUI tests (TC-001, TC-002, TC-005): Playwright headed mode + Robot Browser library\nAPI tests (TC-003, TC-004, TC-006, TC-007, TC-008): Playwright request context + Robot RequestsLibrary\n\nTag each test with layer type. Keep UI and API clearly separated in each file.',
+  'Generate Playwright TypeScript with full professional structure:\n\n- Page Object Model (POM) pattern with BasketPage and LoginPage classes\n- beforeEach/afterEach hooks for setup and teardown\n- Test fixtures for authentication tokens\n- Arrange-Act-Assert comments\n- Descriptive assertion failure messages\n- Group related tests in describe blocks'
+];
+
+function usePwTip(idx){ const ta=document.getElementById('pw-prompt-input'); ta.value=pwTips[idx]; updatePwCharCount(ta); ta.focus(); }
+function updatePwCharCount(ta){ const n=ta.value.length; document.getElementById('pw-char-count').textContent=n+' / 500'; document.getElementById('pw-char-count').style.color=n>450?'var(--amber)':'var(--muted)'; }
+
+function setPwWorkflowStep(step){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('pw-wf'+i); if(!el)continue;
+    el.className='ws '+(i<step?'done':i===step?'active':'idle');
+    el.querySelector('.ws-num').textContent=i<step?'✓':i;
+  }
+}
+function showPwScreen(id){ document.querySelectorAll('.pw-screen').forEach(s=>s.classList.remove('active')); const el=document.getElementById(id); if(el)el.classList.add('active'); }
+
+const pwVsCodeLines=[
+  {code:'<span class="t-gray"># Script Generator — Playwright + Robot Framework</span>'},
+  {code:'<span class="t-blue">import</span> <span class="t-white">anthropic, json</span>'},
+  {code:'<span class="t-blue">from</span> <span class="t-white">pathlib</span> <span class="t-blue">import</span> <span class="t-white">Path</span>'},
+  {code:''},
+  {code:'<span class="t-yellow">def</span> <span class="t-green">generate_playwright</span><span class="t-white">(test_cases, prompt):</span>'},
+  {code:'    <span class="t-white">client = anthropic.Anthropic()</span>'},
+  {code:'    <span class="t-white">response = client.messages.create(</span>'},
+  {code:'        <span class="t-white">model=</span><span class="t-orange">"claude-sonnet-4"</span><span class="t-white">,</span>'},
+  {code:'        <span class="t-white">system=</span><span class="t-orange">"Generate Playwright TypeScript..."</span><span class="t-white">,</span>'},
+  {code:'        <span class="t-white">messages=[{</span><span class="t-orange">"role"</span><span class="t-white">:</span><span class="t-orange">"user"</span><span class="t-white">, </span><span class="t-orange">"content"</span><span class="t-white">: prompt}]</span>'},
+  {code:'    <span class="t-white">)</span>'},
+  {code:'    <span class="t-white">Path(</span><span class="t-orange">"add-to-basket.spec.ts"</span><span class="t-white">).write_text(response.content[0].text)</span>'},
+  {code:''},
+  {code:'<span class="t-yellow">def</span> <span class="t-green">generate_robot</span><span class="t-white">(test_cases, prompt):</span>'},
+  {code:'    <span class="t-gray">    # Same pattern for Robot Framework</span>'},
+  {code:'    <span class="t-white">Path(</span><span class="t-orange">"add_to_basket.robot"</span><span class="t-white">).write_text(rf_script)</span>'},
+];
+const pwTerminalLines=[
+  {text:'<span class="t-white">$ python convert-to-scripts.py --prompt prompt.txt</span>'},
+  {text:'<span class="t-dim">Loading 8 test cases from test_cases.json...</span>'},
+  {text:'<span class="t-green">✓ Test cases loaded</span>'},
+  {text:'<span class="t-warn">⏳ Generating Playwright TypeScript (TC-001 → TC-004)...</span>'},
+  {text:'<span class="t-warn">⏳ Generating Playwright TypeScript (TC-005 → TC-008)...</span>'},
+  {text:'<span class="t-green">✓ add-to-basket.spec.ts written (247 lines)</span>'},
+  {text:'<span class="t-warn">⏳ Generating Robot Framework (TC-001 → TC-004)...</span>'},
+  {text:'<span class="t-warn">⏳ Generating Robot Framework (TC-005 → TC-008)...</span>'},
+  {text:'<span class="t-green">✓ add_to_basket.robot written (189 lines)</span>'},
+  {text:'<span class="t-white">────────────────────────────────────</span>'},
+  {text:'<span class="t-pass">✅ Done in 4.8s · 2 files · 8 test cases each</span>'},
+];
+
+async function submitPwPrompt(){
+  const prompt=document.getElementById('pw-prompt-input').value.trim();
+  if(prompt.length<10){document.getElementById('pw-prompt-input').style.borderColor='var(--accent3)';setTimeout(()=>document.getElementById('pw-prompt-input').style.borderColor='',1500);return;}
+  const btn=document.getElementById('pw-send-btn'); btn.disabled=true;
+  document.getElementById('pw-spin').style.display='block';
+  document.getElementById('pw-send-label').textContent='Sending to AI...';
+  await sp(700);
+  showPwScreen('pw-screen-vscode'); setPwWorkflowStep(2);
+  const codeEl=document.getElementById('pw-vscode-code'), gutterEl=document.getElementById('pw-vscode-gutter'), termEl=document.getElementById('pw-terminal-log');
+  codeEl.innerHTML=''; gutterEl.innerHTML=''; termEl.innerHTML='<span class="t-dim">$</span> ';
+  let ln=1;
+  for(const line of pwVsCodeLines){
+    await sp(180);
+    const d=document.createElement('div'); d.innerHTML=line.code||'&nbsp;'; codeEl.appendChild(d);
+    const g=document.createElement('div'); g.textContent=line.code?ln++:' '; gutterEl.appendChild(g);
+  }
+  for(const tl of pwTerminalLines){
+    await sp(130); const d=document.createElement('div'); d.innerHTML=tl.text; termEl.appendChild(d); termEl.scrollTop=termEl.scrollHeight;
+  }
+  document.getElementById('pw-vscode-status').textContent='✅ Complete';
+  document.getElementById('pw-vscode-status').style.background='rgba(0,212,170,.15)';
+  await sp(800);
+  showPwScreen('pw-screen-results'); setPwWorkflowStep(3);
+  // populate scripts
+  const map=curFw==='pw'?pw:rf; const tcIds2=['tc001','tc002','tc003','tc004','tc005','tc006','tc007','tc008'];
+  tcIds2.forEach(id=>{const el=document.getElementById(curFw+'-'+id+'-c');if(el&&map[id])el.innerHTML=map[id];});
+  applyFilter();
+  btn.disabled=false; document.getElementById('pw-spin').style.display='none'; document.getElementById('pw-send-label').textContent='🤖 Generate Automation Scripts';
+}
+function resetPwToPrompt(){ showPwScreen('pw-screen-prompt'); setPwWorkflowStep(1); document.getElementById('pw-vscode-status').textContent='⏳ Running...'; document.getElementById('pw-vscode-status').style.background=''; }
+
+// ── Panel 3: Execution Workflow ───────────────────────────
+const execTips=[
+  'Run all 8 MakroPRO basket test cases in headed mode on the staging environment.\n\nConfiguration:\n- Browser: Chromium headed\n- Environment: staging (https://staging.makropro.th)\n- Timeout: 30 seconds per test\n- On failure: capture screenshot and continue\n- Report: show pass/fail per test with duration',
+  'TC-005 is failing with body.reason === undefined.\n\nPlease:\n1. Show me the full error output and stack trace\n2. Analyse what changed in the API response\n3. Suggest a fix for the test or flag it as a known staging bug\n4. Re-run TC-005 after the fix is applied',
+  'The "Add to Basket" button selector changed from [data-testid="add-to-basket-btn"] to [data-qa="basket-add"] in the latest build.\n\nPlease:\n1. Find all test cases that reference the old selector\n2. Update them to use the new selector\n3. Re-run the affected tests (TC-002, TC-005) to confirm they pass',
+  'Run the full regression suite in headless mode for CI pipeline.\n\nRequirements:\n- Mode: headless (faster for CI)\n- Output: JUnit XML report to ./reports/results.xml\n- Fail build if: any P1 test fails\n- Retry: flaky tests up to 2 times\n- Parallel: run UI and API tests concurrently'
+];
+function useExecTip(idx){const ta=document.getElementById('exec-prompt-input');ta.value=execTips[idx];updateExecCharCount(ta);ta.focus();}
+function updateExecCharCount(ta){const n=ta.value.length;document.getElementById('exec-char-count').textContent=n+' / 500';document.getElementById('exec-char-count').style.color=n>450?'var(--amber)':'var(--muted)';}
+
+function setExecWorkflowStep(step){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('exec-wf'+i);if(!el)continue;
+    el.className='ws '+(i<step?'done':i===step?'active':'idle');
+    el.querySelector('.ws-num').textContent=i<step?'✓':i;
+  }
+}
+function showExecScreen(id){document.querySelectorAll('.exec-screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
+
+const execVsCodeLines=[
+  {code:'<span class="t-gray"># Playwright Test Runner — AI Orchestrated</span>'},
+  {code:'<span class="t-blue">import</span> <span class="t-white">subprocess, json, sys</span>'},
+  {code:'<span class="t-blue">from</span> <span class="t-white">pathlib</span> <span class="t-blue">import</span> <span class="t-white">Path</span>'},
+  {code:''},
+  {code:'<span class="t-yellow">def</span> <span class="t-green">run_tests</span><span class="t-white">(config: dict) -> dict:</span>'},
+  {code:'    <span class="t-gray">    # Launch Playwright in headed mode</span>'},
+  {code:'    <span class="t-white">cmd = [</span><span class="t-orange">"npx"</span><span class="t-white">, </span><span class="t-orange">"playwright"</span><span class="t-white">, </span><span class="t-orange">"test"</span><span class="t-white">,</span>'},
+  {code:'        <span class="t-orange">"--headed"</span><span class="t-white">, </span><span class="t-orange">"--reporter=json"</span><span class="t-white">]</span>'},
+  {code:'    <span class="t-white">result = subprocess.run(cmd, capture_output=</span><span class="t-green">True</span><span class="t-white">)</span>'},
+  {code:'    <span class="t-white">results = json.loads(result.stdout)</span>'},
+  {code:'    <span class="t-gray">    # AI analyses failures</span>'},
+  {code:'    <span class="t-white">failures = [t </span><span class="t-blue">for</span><span class="t-white"> t </span><span class="t-blue">in</span><span class="t-white"> results[</span><span class="t-orange">"tests"</span><span class="t-white">] </span><span class="t-blue">if</span><span class="t-white"> t[</span><span class="t-orange">"status"</span><span class="t-white">] == </span><span class="t-orange">"failed"</span><span class="t-white">]</span>'},
+  {code:'    <span class="t-blue">return</span> <span class="t-white">analyse_failures(failures)</span>'},
+];
+const execTerminalLines=[
+  {text:'<span class="t-white">$ npx playwright test --headed --reporter=json</span>'},
+  {text:'<span class="t-dim">Launching Chromium (headed)...</span>'},
+  {text:'<span class="t-green">✓ Browser launched</span>'},
+  {text:'<span class="t-warn">⏳ Running TC-001 · Login Flow...</span>'},
+  {text:'<span class="t-pass">✓ TC-001 PASSED · 3.2s</span>'},
+  {text:'<span class="t-warn">⏳ Running TC-002 · Add to Basket...</span>'},
+  {text:'<span class="t-pass">✓ TC-002 PASSED · 4.1s</span>'},
+  {text:'<span class="t-warn">⏳ Running TC-003 · POST basket/items...</span>'},
+  {text:'<span class="t-pass">✓ TC-003 PASSED · 0.38s</span>'},
+  {text:'<span class="t-warn">⏳ Running TC-005 · Out-of-stock...</span>'},
+  {text:'<span class="t-fail">✗ TC-005 FAILED · body.reason undefined</span>'},
+  {text:'<span class="t-white">────────────────────────────────────</span>'},
+  {text:'<span class="t-pass">Results: 5 passed · 2 failed · 1 skipped</span>'},
+];
+
+async function submitExecPrompt(){
+  const prompt=document.getElementById('exec-prompt-input').value.trim();
+  if(prompt.length<10){document.getElementById('exec-prompt-input').style.borderColor='var(--accent3)';setTimeout(()=>document.getElementById('exec-prompt-input').style.borderColor='',1500);return;}
+  const btn=document.getElementById('exec-send-btn');btn.disabled=true;
+  document.getElementById('exec-spin').style.display='block';
+  document.getElementById('exec-send-label').textContent='Configuring runner...';
+  await sp(700);
+  showExecScreen('exec-screen-vscode'); setExecWorkflowStep(2);
+  const codeEl=document.getElementById('exec-vscode-code'),gutterEl=document.getElementById('exec-vscode-gutter'),termEl=document.getElementById('exec-terminal-log');
+  codeEl.innerHTML='';gutterEl.innerHTML='';termEl.innerHTML='<span class="t-dim">$</span> ';
+  let ln=1;
+  for(const line of execVsCodeLines){await sp(160);const d=document.createElement('div');d.innerHTML=line.code||'&nbsp;';codeEl.appendChild(d);const g=document.createElement('div');g.textContent=line.code?ln++:' ';gutterEl.appendChild(g);}
+  for(const tl of execTerminalLines){await sp(200);const d=document.createElement('div');d.innerHTML=tl.text;termEl.appendChild(d);termEl.scrollTop=termEl.scrollHeight;}
+  document.getElementById('exec-vscode-status').textContent='✅ Complete';
+  document.getElementById('exec-vscode-status').style.background='rgba(0,212,170,.15)';
+  await sp(800);
+  showExecScreen('exec-screen-results'); setExecWorkflowStep(3);
+  btn.disabled=false;document.getElementById('exec-spin').style.display='none';document.getElementById('exec-send-label').textContent='▶ Run Tests in Headed Mode';
+}
+function resetExecToPrompt(){showExecScreen('exec-screen-prompt');setExecWorkflowStep(1);document.getElementById('exec-vscode-status').textContent='⏳ Running...';document.getElementById('exec-vscode-status').style.background='';}
+
+// ── Panel 4: Report Workflow ──────────────────────────────
+const rptTips=[
+  'Generate a daily test report for today\'s MakroPRO basket regression run.\n\nInclude:\n- Pass/fail summary by layer (UI tests and API tests separately)\n- Screenshot evidence for each failed test\n- AI root cause analysis for TC-005 and TC-007 failures\n- Severity rating for each failure\n- Action items and recommended fixes before Thursday release',
+  'Create an executive summary report for stakeholders.\n\nAudience: Product Manager and Release Manager\nFormat: Non-technical language\n\nInclude:\n- Overall health status (green/amber/red)\n- Which features are safe to release vs blocked\n- Business impact of the 2 failures\n- Go/No-Go recommendation with justification',
+  'Generate a bug-focused report listing all failed tests with detailed analysis.\n\nFor each failure include:\n- Test name and ID\n- Root cause analysis\n- Affected component (UI / API / database)\n- Severity (Critical/High/Medium/Low)\n- Suggested Jira ticket title and description\n- Estimated fix effort',
+  'Show test quality trends and coverage metrics.\n\nInclude:\n- Pass rate trend over the last 5 runs\n- API SLA compliance (TC-004 response time vs 3s limit)\n- Flaky test identification\n- Coverage gaps (untested scenarios)\n- Recommendations for improving test stability'
+];
+function useRptTip(idx){const ta=document.getElementById('rpt-prompt-input');ta.value=rptTips[idx];updateRptCharCount(ta);ta.focus();}
+function updateRptCharCount(ta){const n=ta.value.length;document.getElementById('rpt-char-count').textContent=n+' / 500';document.getElementById('rpt-char-count').style.color=n>450?'var(--amber)':'var(--muted)';}
+
+function setRptWorkflowStep(step){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('rpt-wf'+i);if(!el)continue;
+    el.className='ws '+(i<step?'done':i===step?'active':'idle');
+    el.querySelector('.ws-num').textContent=i<step?'✓':i;
+  }
+}
+function showRptScreen(id){document.querySelectorAll('.rpt-ws').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
+
+const rptVsCodeLines=[
+  {code:'<span class="t-gray"># Report Generator — AI Powered</span>'},
+  {code:'<span class="t-blue">import</span> <span class="t-white">anthropic, json, datetime</span>'},
+  {code:'<span class="t-blue">from</span> <span class="t-white">pathlib</span> <span class="t-blue">import</span> <span class="t-white">Path</span>'},
+  {code:''},
+  {code:'<span class="t-yellow">def</span> <span class="t-green">generate_report</span><span class="t-white">(results, prompt):</span>'},
+  {code:'    <span class="t-white">client = anthropic.Anthropic()</span>'},
+  {code:'    <span class="t-gray">    # Load test results</span>'},
+  {code:'    <span class="t-white">data = json.load(open(</span><span class="t-orange">"test_results.json"</span><span class="t-white">))</span>'},
+  {code:'    <span class="t-white">context = build_context(data, datetime.now())</span>'},
+  {code:'    <span class="t-gray">    # AI analyses and writes report</span>'},
+  {code:'    <span class="t-white">response = client.messages.create(</span>'},
+  {code:'        <span class="t-white">model=</span><span class="t-orange">"claude-sonnet-4"</span><span class="t-white">,</span>'},
+  {code:'        <span class="t-white">system=context, messages=[{</span><span class="t-orange">"role"</span><span class="t-white">:</span><span class="t-orange">"user"</span><span class="t-white">,</span><span class="t-orange">"content"</span><span class="t-white">:prompt}]</span>'},
+  {code:'    <span class="t-white">)</span>'},
+  {code:'    <span class="t-white">Path(</span><span class="t-orange">"daily_report.html"</span><span class="t-white">).write_text(response.content[0].text)</span>'},
+];
+const rptTerminalLines=[
+  {text:'<span class="t-white">$ python generate-report.py --prompt prompt.txt</span>'},
+  {text:'<span class="t-dim">Loading test results (8 test cases)...</span>'},
+  {text:'<span class="t-green">✓ Results loaded: 5 passed, 2 failed, 1 skipped</span>'},
+  {text:'<span class="t-warn">⏳ Analysing UI test results...</span>'},
+  {text:'<span class="t-warn">⏳ Analysing API test results...</span>'},
+  {text:'<span class="t-warn">⏳ Generating root cause analysis for TC-005...</span>'},
+  {text:'<span class="t-warn">⏳ Generating root cause analysis for TC-007...</span>'},
+  {text:'<span class="t-warn">⏳ Compiling screenshots and evidence...</span>'},
+  {text:'<span class="t-warn">⏳ Writing AI recommendations...</span>'},
+  {text:'<span class="t-green">✓ daily_report.html generated</span>'},
+  {text:'<span class="t-green">✓ Sending to Slack #qa-reports...</span>'},
+  {text:'<span class="t-white">────────────────────────────────────</span>'},
+  {text:'<span class="t-pass">✅ Report ready · 5.1s · Shared to Slack + Jira</span>'},
+];
+
+async function submitRptPrompt(){
+  const prompt=document.getElementById('rpt-prompt-input').value.trim();
+  if(prompt.length<10){document.getElementById('rpt-prompt-input').style.borderColor='var(--accent3)';setTimeout(()=>document.getElementById('rpt-prompt-input').style.borderColor='',1500);return;}
+  const btn=document.getElementById('rpt-send-btn');btn.disabled=true;
+  document.getElementById('rpt-gen-spin').style.display='block';
+  document.getElementById('rpt-send-label').textContent='Compiling report...';
+  await sp(700);
+  showRptScreen('rpt-screen-vscode'); setRptWorkflowStep(2);
+  const codeEl=document.getElementById('rpt-vscode-code'),gutterEl=document.getElementById('rpt-vscode-gutter'),termEl=document.getElementById('rpt-terminal-log');
+  codeEl.innerHTML='';gutterEl.innerHTML='';termEl.innerHTML='<span class="t-dim">$</span> ';
+  let ln=1;
+  for(const line of rptVsCodeLines){await sp(160);const d=document.createElement('div');d.innerHTML=line.code||'&nbsp;';codeEl.appendChild(d);const g=document.createElement('div');g.textContent=line.code?ln++:' ';gutterEl.appendChild(g);}
+  for(const tl of rptTerminalLines){await sp(160);const d=document.createElement('div');d.innerHTML=tl.text;termEl.appendChild(d);termEl.scrollTop=termEl.scrollHeight;}
+  document.getElementById('rpt-vscode-status').textContent='✅ Complete';
+  document.getElementById('rpt-vscode-status').style.background='rgba(0,212,170,.15)';
+  await sp(800);
+  showRptScreen('rpt-screen-results'); setRptWorkflowStep(3);
+  setRdate();
+  btn.disabled=false;document.getElementById('rpt-gen-spin').style.display='none';document.getElementById('rpt-send-label').textContent='✦ Generate Awesome Test Report';
+}
+function resetRptToPrompt(){showRptScreen('rpt-screen-prompt');setRptWorkflowStep(1);document.getElementById('rpt-vscode-status').textContent='⏳ Compiling...';document.getElementById('rpt-vscode-status').style.background='';}
+function setRdate(){const d=new Date();const el=document.getElementById('rdate');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+const promptTips = [
+  'Generate comprehensive UI and API test cases for the MakroPRO add-to-basket feature.\n\nCover:\n- UI flows: login, product page interaction, basket count update, toast notification\n- API endpoints: POST /api/v2/basket/items, GET /api/v2/basket\n- Happy path, edge cases (out-of-stock, duplicate items), security (unauthorized access)\n\nFormat each test case with: Prerequisites, Test Steps, and Expected Results.\nTag each with layer type (UI/API) and priority (P1/P2).',
+  'Using the MakroPRO user story below, generate test cases that include:\n- Clear prerequisites for each test\n- Step-by-step test instructions\n- Expected results with exact HTTP status codes\n\nReference endpoints: POST /api/v2/basket/items (returns 201), GET /api/v2/basket (SLA ≤ 3s).\nInclude both positive and negative scenarios.',
+  'Generate separate UI tests (for Playwright) and API tests (for Robot Framework).\n\nUI tests should cover: login flow, add-to-basket interaction, toast notification, basket count.\nAPI tests should cover: 201 Created, 422 out-of-stock, 401 unauthorized, duplicate quantity merge.\n\nTag each test with layer type and assign priority P1 (critical) or P2 (important).',
+  'Generate edge case and security test cases for the MakroPRO basket feature:\n\n1. Out-of-stock product: UI button disabled + API returns 422 with reason "out_of_stock"\n2. Duplicate add: same product added twice → quantity increments, no duplicate item created\n3. Unauthenticated: no auth token → API returns 401 (not 500)\n4. Invalid quantity: qty=0 or qty=-1 → API returns 422 validation error\n\nInclude prerequisites and expected results for each.'
+];
+
+function usePromptTip(idx) {
+  const ta = document.getElementById('prompt-input');
+  ta.value = promptTips[idx];
+  updateCharCount(ta);
+  ta.focus();
+  ta.scrollTop = 0;
+}
+
+function updateCharCount(ta) {
+  const n = ta.value.length;
+  document.getElementById('char-count').textContent = n + ' / 500';
+  document.getElementById('char-count').style.color = n > 450 ? 'var(--amber)' : 'var(--muted)';
+}
+
+const vsCodeLines = [
+  {code: '<span class="t-gray"># AI Test Case Generator — MakroPRO</span>', delay: 0},
+  {code: '<span class="t-blue">import</span> <span class="t-white">anthropic, json, re</span>', delay: 300},
+  {code: '<span class="t-blue">from</span> <span class="t-white">pathlib</span> <span class="t-blue">import</span> <span class="t-white">Path</span>', delay: 500},
+  {code: '', delay: 600},
+  {code: '<span class="t-yellow">def</span> <span class="t-green">generate_test_cases</span><span class="t-white">(prompt: str) -> list:</span>', delay: 800},
+  {code: '    <span class="t-white">client = anthropic.Anthropic()</span>', delay: 1000},
+  {code: '    <span class="t-gray">    # Send prompt to Claude</span>', delay: 1200},
+  {code: '    <span class="t-white">response = client.messages.create(</span>', delay: 1400},
+  {code: '        <span class="t-white">model=</span><span class="t-orange">"claude-sonnet-4"</span><span class="t-white">,</span>', delay: 1600},
+  {code: '        <span class="t-white">max_tokens=</span><span class="t-green">4096</span><span class="t-white">,</span>', delay: 1700},
+  {code: '        <span class="t-white">system=</span><span class="t-orange">"You are a senior QA engineer..."</span><span class="t-white">,</span>', delay: 1800},
+  {code: '        <span class="t-white">messages=[{</span><span class="t-orange">"role"</span><span class="t-white">:</span><span class="t-orange">"user"</span><span class="t-white">,</span><span class="t-orange">"content"</span><span class="t-white">: prompt}]</span>', delay: 1900},
+  {code: '    <span class="t-white">)</span>', delay: 2000},
+  {code: '', delay: 2100},
+  {code: '    <span class="t-gray">    # Parse and structure the output</span>', delay: 2200},
+  {code: '    <span class="t-white">raw = response.content[</span><span class="t-green">0</span><span class="t-white">].text</span>', delay: 2400},
+  {code: '    <span class="t-white">test_cases = parse_test_cases(raw)</span>', delay: 2600},
+  {code: '    <span class="t-white">Path(</span><span class="t-orange">"output/test_cases.json"</span><span class="t-white">).write_text(</span>', delay: 2800},
+  {code: '        <span class="t-white">json.dumps(test_cases, indent=</span><span class="t-green">2</span><span class="t-white">))</span>', delay: 2900},
+  {code: '    <span class="t-blue">return</span> <span class="t-white">test_cases</span>', delay: 3000},
+];
+
+const terminalLines = [
+  {text: '<span class="t-white">$ python generate-test-cases.py --prompt prompt.txt</span>', delay: 200},
+  {text: '<span class="t-dim">Connecting to Claude API...</span>', delay: 600},
+  {text: '<span class="t-green">✓ API connection established</span>', delay: 1200},
+  {text: '<span class="t-dim">Sending prompt (347 tokens)...</span>', delay: 1800},
+  {text: '<span class="t-warn">⏳ Analysing user story and acceptance criteria...</span>', delay: 2500},
+  {text: '<span class="t-warn">⏳ Generating UI test cases (TC-001 → TC-002)...</span>', delay: 3200},
+  {text: '<span class="t-warn">⏳ Generating API test cases (TC-003 → TC-004)...</span>', delay: 3900},
+  {text: '<span class="t-warn">⏳ Generating edge case tests (TC-005 → TC-006)...</span>', delay: 4600},
+  {text: '<span class="t-warn">⏳ Generating security tests (TC-007 → TC-008)...</span>', delay: 5300},
+  {text: '<span class="t-green">✓ 8 test cases generated successfully</span>', delay: 6000},
+  {text: '<span class="t-green">✓ Saved to output/test_cases.json</span>', delay: 6300},
+  {text: '<span class="t-white">────────────────────────────────────</span>', delay: 6500},
+  {text: '<span class="t-pass">✅ Done in 6.2s · 8 test cases · Coverage: UI + API</span>', delay: 6700},
+];
+
+function setWorkflowStep(step) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('wf' + i);
+    if (!el) continue;
+    el.className = 'ws ' + (i < step ? 'done' : i === step ? 'active' : 'idle');
+    const num = el.querySelector('.ws-num');
+    if (i < step) num.textContent = '✓';
+    else num.textContent = i;
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.tc-screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+async function submitPrompt() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  if (prompt.length < 10) {
+    document.getElementById('prompt-input').style.borderColor = 'var(--accent3)';
+    setTimeout(() => document.getElementById('prompt-input').style.borderColor = '', 1500);
+    return;
+  }
+  const btn = document.getElementById('send-prompt-btn');
+  const lbl = document.getElementById('send-label');
+  const spin = document.getElementById('prompt-spin');
+  btn.disabled = true;
+  spin.style.display = 'block';
+  lbl.textContent = 'Sending to AI...';
+  await sp(800);
+
+  // Switch to VS Code screen
+  showScreen('screen-vscode');
+  setWorkflowStep(2);
+
+  // Animate code lines
+  const codeEl = document.getElementById('vscode-code');
+  const gutterEl = document.getElementById('vscode-gutter');
+  const termEl = document.getElementById('vscode-terminal-log');
+  codeEl.innerHTML = '';
+  gutterEl.innerHTML = '';
+  termEl.innerHTML = '<span class="t-dim">$</span> ';
+
+  let lineNum = 1;
+  for (const line of vsCodeLines) {
+    await sp(line.delay > 0 ? Math.min(line.delay, 200) : 0);
+    const div = document.createElement('div');
+    div.innerHTML = line.code || '&nbsp;';
+    codeEl.appendChild(div);
+    const gDiv = document.createElement('div');
+    gDiv.textContent = line.code ? lineNum++ : ' ';
+    gutterEl.appendChild(gDiv);
+    codeEl.parentElement.parentElement.scrollTop = codeEl.scrollHeight;
+  }
+
+  // Animate terminal lines
+  for (const tLine of terminalLines) {
+    await sp(150);
+    const div = document.createElement('div');
+    div.innerHTML = tLine.text;
+    termEl.appendChild(div);
+    termEl.scrollTop = termEl.scrollHeight;
+  }
+
+  document.getElementById('vscode-status').textContent = '✅ Complete';
+  document.getElementById('vscode-status').style.background = 'rgba(0,212,170,.15)';
+
+  await sp(900);
+
+  // Switch to results
+  showScreen('screen-results');
+  setWorkflowStep(3);
+  document.getElementById('tcg').style.display = 'block';
+  document.getElementById('tc-footnote').style.display = 'block';
+  document.querySelectorAll('.tc-item').forEach((c, i) => setTimeout(() => c.classList.add('show'), i * 90));
+  btn.disabled = false;
+  spin.style.display = 'none';
+  lbl.textContent = '🤖 Send to AI → Generate Test Cases';
+}
+
+function resetToPrompt() {
+  showScreen('screen-prompt');
+  setWorkflowStep(1);
+  document.getElementById('tcg').style.display = 'none';
+  document.getElementById('tc-footnote').style.display = 'none';
+  document.querySelectorAll('.tc-item').forEach(c => c.classList.remove('show'));
+  document.getElementById('vscode-status').textContent = '⏳ Running...';
+  document.getElementById('vscode-status').style.background = '';
+}
+
+function toggleTC(id) { document.getElementById(id).classList.toggle('open'); }
 const pw={tc001:`<span class="kw">test</span>(<span class="str">'TC-001: Login → homepage redirect'</span>, <span class="kw">async</span> ({ page }) => {\n  <span class="cmt">// Arrange</span>\n  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://www.makropro.th/login'</span>);\n  <span class="cmt">// Act</span>\n  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'[data-testid="email"]'</span>, <span class="str">'customer@test.com'</span>);\n  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'[data-testid="password"]'</span>, <span class="str">'Password123'</span>);\n  <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'[data-testid="login-btn"]'</span>);\n  <span class="cmt">// Assert</span>\n  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveURL</span>(<span class="str">'/home'</span>);\n  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'[data-testid="basket-icon"]'</span>)).<span class="fn">toBeVisible</span>();\n});`,tc004:`<span class="kw">test</span>(<span class="str">'TC-004: GET basket — available within SLA'</span>, <span class="kw">async</span> ({ request }) => {\n  <span class="cmt">// Arrange: product already added (TC-003 prerequisite)</span>\n  <span class="kw">const</span> headers = { <span class="str">'Authorization'</span>: <span class="str">'Bearer \${TOKEN}'</span> };\n  <span class="cmt">// Act</span>\n  <span class="kw">const</span> start = Date.<span class="fn">now</span>();\n  <span class="kw">const</span> res = <span class="kw">await</span> request.<span class="fn">get</span>(<span class="str">'/api/v2/basket'</span>, { headers });\n  <span class="kw">const</span> elapsed = Date.<span class="fn">now</span>() - start;\n  <span class="cmt">// Assert</span>\n  <span class="fn">expect</span>(res.<span class="fn">status</span>()).<span class="fn">toBe</span>(200);\n  <span class="kw">const</span> body = <span class="kw">await</span> res.<span class="fn">json</span>();\n  <span class="fn">expect</span>(body.items[0].<span class="prop">status</span>).<span class="fn">toBe</span>(<span class="str">'available'</span>);\n  <span class="fn">expect</span>(elapsed).<span class="fn">toBeLessThan</span>(3000); <span class="cmt">// SLA ≤ 3s</span>\n});`,tc008:`<span class="kw">test</span>(<span class="str">'TC-008: Zero / negative quantity → 422'</span>, <span class="kw">async</span> ({ request }) => {\n  <span class="kw">const</span> headers = { <span class="str">'Authorization'</span>: <span class="str">'Bearer \${TOKEN}'</span> };\n  <span class="cmt">// Test qty = 0</span>\n  <span class="kw">const</span> r0 = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, {\n    headers, <span class="prop">data</span>: { <span class="prop">product_id</span>: <span class="str">'MKP-RICE-001'</span>, <span class="prop">quantity</span>: 0 },\n  });\n  <span class="fn">expect</span>(r0.<span class="fn">status</span>()).<span class="fn">toBe</span>(422);\n  <span class="cmt">// Test qty = -1</span>\n  <span class="kw">const</span> r1 = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, {\n    headers, <span class="prop">data</span>: { <span class="prop">product_id</span>: <span class="str">'MKP-RICE-001'</span>, <span class="prop">quantity</span>: -1 },\n  });\n  <span class="fn">expect</span>(r1.<span class="fn">status</span>()).<span class="fn">toBe</span>(422);\n  <span class="cmt">// Assert basket is still empty</span>\n  <span class="kw">const</span> basket = <span class="kw">await</span> (await request.<span class="fn">get</span>(<span class="str">'/api/v2/basket'</span>, { headers })).<span class="fn">json</span>();\n  <span class="fn">expect</span>(basket.items.length).<span class="fn">toBe</span>(0);\n});`,tc002:`<span class="kw">test</span>(<span class="str">'TC-002: Add to basket'</span>, <span class="kw">async</span> ({ page }) => {\n  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://www.makropro.th/products/thai-jasmine-rice'</span>);\n  <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'[data-testid="add-to-basket-btn"]'</span>);\n  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'[data-testid="basket-count"]'</span>)).<span class="fn">toHaveText</span>(<span class="str">'1'</span>);\n  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'[data-testid="confirm-toast"]'</span>)).<span class="fn">toBeVisible</span>();\n});`,tc003:`<span class="kw">test</span>(<span class="str">'TC-003: POST basket/items → 201'</span>, <span class="kw">async</span> ({ request }) => {\n  <span class="kw">const</span> res = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, {\n    <span class="prop">headers</span>: { <span class="str">'Authorization'</span>: <span class="str">'Bearer \${TOKEN}'</span> },\n    <span class="prop">data</span>: { <span class="prop">product_id</span>: <span class="str">'MKP-RICE-001'</span>, <span class="prop">quantity</span>: 1 },\n  });\n  <span class="fn">expect</span>(res.<span class="fn">status</span>()).<span class="fn">toBe</span>(201);\n  <span class="fn">expect</span>((<span class="kw">await</span> res.<span class="fn">json</span>()).<span class="prop">status</span>).<span class="fn">toBe</span>(<span class="str">'available'</span>);\n});`,tc005:`<span class="kw">test</span>(<span class="str">'TC-005: Out-of-stock disabled + 422'</span>, <span class="kw">async</span> ({ page, request }) => {\n  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://www.makropro.th/products/out-of-stock-item'</span>);\n  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'[data-testid="add-to-basket-btn"]'</span>)).<span class="fn">toBeDisabled</span>();\n  <span class="kw">const</span> res = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, { <span class="prop">data</span>: { <span class="prop">product_id</span>: <span class="str">'MKP-OOS-001'</span> } });\n  <span class="fn">expect</span>(res.<span class="fn">status</span>()).<span class="fn">toBe</span>(422);\n  <span class="fn">expect</span>((<span class="kw">await</span> res.<span class="fn">json</span>()).<span class="prop">reason</span>).<span class="fn">toBe</span>(<span class="str">'out_of_stock'</span>);\n});`,tc006:`<span class="kw">test</span>(<span class="str">'TC-006: Duplicate increments qty'</span>, <span class="kw">async</span> ({ request }) => {\n  <span class="kw">const</span> h = { <span class="str">'Authorization'</span>: <span class="str">'Bearer \${TOKEN}'</span> };\n  <span class="kw">const</span> b = { <span class="prop">product_id</span>: <span class="str">'MKP-RICE-001'</span>, <span class="prop">quantity</span>: 1 };\n  <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, { <span class="prop">headers</span>:h, <span class="prop">data</span>:b });\n  <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, { <span class="prop">headers</span>:h, <span class="prop">data</span>:b });\n  <span class="kw">const</span> basket = <span class="kw">await</span> (await request.<span class="fn">get</span>(<span class="str">'/api/v2/basket'</span>,{<span class="prop">headers</span>:h})).<span class="fn">json</span>();\n  <span class="fn">expect</span>(basket.items.length).<span class="fn">toBe</span>(1);\n  <span class="fn">expect</span>(basket.items[0].<span class="prop">quantity</span>).<span class="fn">toBe</span>(2);\n});`,tc007:`<span class="kw">test</span>(<span class="str">'TC-007: Unauthenticated → 401'</span>, <span class="kw">async</span> ({ request }) => {\n  <span class="kw">const</span> res = <span class="kw">await</span> request.<span class="fn">post</span>(<span class="str">'/api/v2/basket/items'</span>, {\n    <span class="prop">data</span>: { <span class="prop">product_id</span>: <span class="str">'MKP-RICE-001'</span>, <span class="prop">quantity</span>: 1 },\n  });\n  <span class="fn">expect</span>(res.<span class="fn">status</span>()).<span class="fn">toBe</span>(401);\n});`};
 const rf={tc001:`<span class="dec">TC-001 Login To Homepage — Success</span>\n    <span class="cmt">*** Settings ***</span>\n    <span class="fn">New Browser</span>    chromium    headless=False\n    <span class="fn">New Page</span>        https://www.makropro.th/login\n    <span class="cmt"># Act</span>\n    <span class="fn">Fill Text</span>       data-testid=email       customer@test.com\n    <span class="fn">Fill Text</span>       data-testid=password    Password123\n    <span class="fn">Click</span>           data-testid=login-btn\n    <span class="cmt"># Assert</span>\n    <span class="fn">Get Url</span>         ==    https://www.makropro.th/home\n    <span class="fn">Wait For Elements State</span>    data-testid=basket-icon    visible`,tc004:`<span class="dec">TC-004 GET Basket — Available Within SLA</span>\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{h}</span>=    <span class="fn">Create Dictionary</span>    Authorization=Bearer <span class="str">\${TOKEN}</span>\n    <span class="cmt"># Act</span>\n    <span class="kw">\${start}</span>=    <span class="fn">Get Time</span>    epoch\n    <span class="kw">\${r}</span>=       <span class="fn">GET On Session</span>    makro    /api/v2/basket    headers=<span class="kw">\${h}</span>\n    <span class="kw">\${end}</span>=    <span class="fn">Get Time</span>    epoch\n    <span class="cmt"># Assert</span>\n    <span class="fn">Should Be Equal As Strings</span>    <span class="kw">\${r.status_code}</span>    200\n    <span class="fn">Should Be Equal</span>    <span class="kw">\${r.json()['items'][0]['status']}</span>    available\n    <span class="kw">\${elapsed}</span>=    <span class="fn">Evaluate</span>    <span class="kw">\${end}</span>-<span class="kw">\${start}</span>\n    <span class="fn">Should Be True</span>    <span class="kw">\${elapsed}</span> < 3    msg=Response exceeded SLA of 3s`,tc008:`<span class="dec">TC-008 Zero / Negative Quantity Guard</span>\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{h}</span>=    <span class="fn">Create Dictionary</span>    Authorization=Bearer <span class="str">\${TOKEN}</span>\n    <span class="cmt"># Test quantity = 0</span>\n    <span class="kw">&{b0}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-RICE-001    quantity=<span class="str">0</span>\n    <span class="kw">\${r0}</span>=    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b0}</span>    headers=<span class="kw">\${h}</span>    expected_status=422\n    <span class="fn">Should Be Equal As Strings</span>    <span class="kw">\${r0.status_code}</span>    422\n    <span class="cmt"># Test quantity = -1</span>\n    <span class="kw">&{b1}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-RICE-001    quantity=<span class="str">-1</span>\n    <span class="kw">\${r1}</span>=    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b1}</span>    headers=<span class="kw">\${h}</span>    expected_status=422\n    <span class="fn">Should Be Equal As Strings</span>    <span class="kw">\${r1.status_code}</span>    422`,tc002:`<span class="dec">TC-002 Add To Basket — Success</span>\n    <span class="fn">New Browser</span>    chromium    headless=False\n    <span class="fn">New Page</span>        https://www.makropro.th/products/thai-jasmine-rice\n    <span class="fn">Click</span>           data-testid=add-to-basket-btn\n    <span class="fn">Get Text</span>        data-testid=basket-count    ==    1\n    <span class="fn">Wait For Elements State</span>    data-testid=confirm-toast    visible`,tc003:`<span class="dec">TC-003 POST Basket Item — 201</span>\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{h}</span>=    <span class="fn">Create Dictionary</span>    Authorization=Bearer <span class="str">\${TOKEN}</span>\n    <span class="kw">&{b}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-RICE-001    quantity=<span class="str">1</span>\n    <span class="kw">\${r}</span>=    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b}</span>    headers=<span class="kw">\${h}</span>\n    <span class="fn">Should Be Equal As Strings</span>    <span class="kw">\${r.status_code}</span>    201`,tc005:`<span class="dec">TC-005 Out-Of-Stock Disabled And 422</span>\n    <span class="fn">New Page</span>    https://www.makropro.th/products/out-of-stock-item\n    <span class="fn">Get Element States</span>    data-testid=add-to-basket-btn    contains    disabled\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{h}</span>=    <span class="fn">Create Dictionary</span>    Authorization=Bearer <span class="str">\${TOKEN}</span>\n    <span class="kw">&{b}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-OOS-001    quantity=<span class="str">1</span>\n    <span class="kw">\${r}</span>=    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b}</span>    headers=<span class="kw">\${h}</span>    expected_status=422\n    <span class="fn">Should Be Equal</span>    <span class="kw">\${r.json()['reason']}</span>    out_of_stock`,tc006:`<span class="dec">TC-006 Duplicate Add — Quantity Increments</span>\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{h}</span>=    <span class="fn">Create Dictionary</span>    Authorization=Bearer <span class="str">\${TOKEN}</span>\n    <span class="kw">&{b}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-RICE-001    quantity=<span class="str">1</span>\n    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b}</span>    headers=<span class="kw">\${h}</span>\n    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b}</span>    headers=<span class="kw">\${h}</span>\n    <span class="kw">\${basket}</span>=    <span class="fn">GET On Session</span>    makro    /api/v2/basket    headers=<span class="kw">\${h}</span>\n    <span class="fn">Length Should Be</span>    <span class="kw">\${basket.json()['items']}</span>    1\n    <span class="fn">Should Be Equal As Integers</span>    <span class="kw">\${basket.json()['items'][0]['quantity']}</span>    2`,tc007:`<span class="dec">TC-007 Unauthenticated — 401</span>\n    <span class="fn">Create Session</span>    makro    https://api.makropro.th\n    <span class="kw">&{b}</span>=    <span class="fn">Create Dictionary</span>    product_id=MKP-RICE-001    quantity=<span class="str">1</span>\n    <span class="kw">\${r}</span>=    <span class="fn">POST On Session</span>    makro    /api/v2/basket/items    json=<span class="kw">\${b}</span>    expected_status=401\n    <span class="fn">Should Be Equal As Strings</span>    <span class="kw">\${r.status_code}</span>    401`};
 let curFw='pw',genFw=null,gen=false,curFilter='all';
